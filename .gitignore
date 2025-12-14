@@ -1,0 +1,25 @@
+# .gitignore
+
+# 1. DATA (Never upload the videos!)
+MP_Data/
+data/
+*.npy
+
+# 2. MODELS (Too big for standard Git)
+model/
+*.h5
+*.keras
+
+# 3. LOGS
+logs/
+training_logs/
+
+# 4. PYTHON SYSTEM FILES
+__pycache__/
+*.py[cod]
+venv/
+env/
+.env
+.DS_Store
+.vscode/
+.idea/
