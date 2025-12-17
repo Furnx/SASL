@@ -2,14 +2,17 @@
 Distributed Data Collection Script for WeThinkCode_ Sign Language Project
 Updates:
   - Adds User ID to prevent cloud storage overwrites
-  - improved UX (Wait for Spacebar)
-  - Auto-creates config if missing
+  - Full screen video display
+  - Space key to start/continue recording
+  - Review and retake option after each sign
+  - Backspace to retake, any other key to continue
 """
 import cv2
 import numpy as np
 import os
 import sys
 import time
+import shutil
 
 # --------------------------------------------------------------------------
 # IMPORT CONFIGURATION (Connects to config.py)
@@ -81,84 +84,177 @@ def main():
         print("Cannot access webcam.")
         return
 
-    # Set mediapipe model 
+    # Set full screen window
+    cv2.namedWindow('SASL Data Collection', cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty('SASL Data Collection', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+    # Set mediapipe model
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-        
+
         # Loop through actions (Pulled from config.py)
         for action in ACTIONS:
             print(f"\n--- PREPARING FOR ACTION: {action} ---")
-            
-            # Create action folder (MP_Data/hello)
-            action_path = os.path.join(DATA_PATH, action)
-            if not os.path.exists(action_path):
-                os.makedirs(action_path)
-            
-            # Loop through sequences (videos)
-            for sequence in range(no_sequences):
-                
-                # 2. CREATE UNIQUE FOLDER NAME: User_Sequence (e.g., Thabo_0)
-                folder_name = f"{user_name}_{sequence}"
-                sequence_path = os.path.join(action_path, folder_name)
-                
-                # Create the specific folder for this video
-                if not os.path.exists(sequence_path):
-                    os.makedirs(sequence_path)
 
-                # Loop through video length (sequence_length)
-                for frame_num in range(sequence_length):
+            # Flag to control retake
+            retake_sign = True
 
-                    # Read feed
+            while retake_sign:
+                # Create action folder (MP_Data/hello)
+                action_path = os.path.join(DATA_PATH, action)
+                if not os.path.exists(action_path):
+                    os.makedirs(action_path)
+
+                # Show initial instruction screen for this sign
+                while True:
                     ret, frame = cap.read()
-                    if not ret: break
+                    if not ret:
+                        break
 
-                    # Make detections
+                    # Make detections for live preview
                     image, results = mediapipe_detection(frame, holistic)
                     draw_styled_landmarks(image, results)
-                    
-                    # 3. BETTER UX: WAIT LOGIC
-                    if frame_num == 0:
-                        while True:
-                            # Show "Waiting" Screen
-                            display_image = image.copy()
-                            cv2.putText(display_image, f'COLLECTING: {action}', (120,200), 
-                                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255, 0), 4, cv2.LINE_AA)
-                            cv2.putText(display_image, f'Video {sequence+1} of {no_sequences}', (120,250), 
-                                        cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 1, cv2.LINE_AA)
-                            cv2.putText(display_image, 'Press "SPACE" to Record', (120,300), 
-                                        cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
-                            
-                            cv2.imshow('OpenCV Feed', display_image)
-                            
-                            key = cv2.waitKey(10)
-                            if key == 32: # SPACE bar
+
+                    # Get screen dimensions for centering text
+                    h, w = image.shape[:2]
+
+                    # Show instruction screen
+                    cv2.putText(image, f'SIGN: {action.upper()}', (w//2 - 200, h//2 - 100),
+                                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
+                    cv2.putText(image, f'You will record {no_sequences} videos', (w//2 - 250, h//2),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                    cv2.putText(image, 'Press SPACE to start recording', (w//2 - 280, h//2 + 60),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                    cv2.putText(image, 'Press Q to quit', (w//2 - 150, h//2 + 120),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (100, 100, 100), 2, cv2.LINE_AA)
+
+                    cv2.imshow('SASL Data Collection', image)
+
+                    key = cv2.waitKey(10)
+                    if key == 32:  # SPACE bar
+                        break
+                    if key == ord('q'):
+                        cap.release()
+                        cv2.destroyAllWindows()
+                        sys.exit()
+
+                # Loop through sequences (videos)
+                for sequence in range(no_sequences):
+
+                    # 2. CREATE UNIQUE FOLDER NAME: User_Sequence (e.g., Thabo_0)
+                    folder_name = f"{user_name}_{sequence}"
+                    sequence_path = os.path.join(action_path, folder_name)
+
+                    # Create the specific folder for this video
+                    if not os.path.exists(sequence_path):
+                        os.makedirs(sequence_path)
+
+                    # Countdown between videos (3 seconds)
+                    if sequence > 0:  # Don't countdown before first sequence (already waited above)
+                        for countdown in range(3, 0, -1):
+                            ret, frame = cap.read()
+                            if not ret:
                                 break
-                            if key == ord('q'):
+
+                            image, results = mediapipe_detection(frame, holistic)
+                            draw_styled_landmarks(image, results)
+
+                            h, w = image.shape[:2]
+
+                            # Show countdown
+                            cv2.putText(image, f'SIGN: {action.upper()}', (w//2 - 200, h//2 - 150),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
+                            cv2.putText(image, f'Video {sequence + 1} of {no_sequences}', (w//2 - 200, h//2 - 50),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 2, cv2.LINE_AA)
+                            cv2.putText(image, f'Starting in {countdown}...', (w//2 - 180, h//2 + 50),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4, cv2.LINE_AA)
+                            cv2.putText(image, 'Get ready!', (w//2 - 120, h//2 + 130),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 0), 3, cv2.LINE_AA)
+
+                            cv2.imshow('SASL Data Collection', image)
+
+                            # Check for quit during countdown
+                            if cv2.waitKey(1000) & 0xFF == ord('q'):
                                 cap.release()
                                 cv2.destroyAllWindows()
                                 sys.exit()
 
-                        # Quick 1s Countdown after space press
-                        cv2.putText(image, '3...', (120,200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255, 0), 4, cv2.LINE_AA)
-                        cv2.imshow('OpenCV Feed', image)
-                        cv2.waitKey(500)
-                    
-                    # RECORDING FEEDBACK
-                    cv2.putText(image, f'Recording {action}: {sequence+1}/{no_sequences}', (15,12), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
-                    
-                    # Show to screen
-                    cv2.imshow('OpenCV Feed', image)
+                    # Loop through video length (sequence_length)
+                    for frame_num in range(sequence_length):
 
-                    # Export keypoints
-                    keypoints = extract_keypoints(results)
-                    npy_path = os.path.join(sequence_path, str(frame_num))
-                    np.save(npy_path, keypoints)
+                        # Read feed
+                        ret, frame = cap.read()
+                        if not ret:
+                            break
 
-                    # Break gracefully
-                    if cv2.waitKey(10) & 0xFF == ord('q'):
-                        cap.release()
-                        cv2.destroyAllWindows()
-                        sys.exit()
+                        # Make detections
+                        image, results = mediapipe_detection(frame, holistic)
+                        draw_styled_landmarks(image, results)
+
+                        h, w = image.shape[:2]
+
+                        # RECORDING FEEDBACK
+                        cv2.putText(image, f'RECORDING: {action.upper()}', (50, 50),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
+                        cv2.putText(image, f'Video {sequence + 1}/{no_sequences} | Frame {frame_num + 1}/{sequence_length}', (50, 100),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+
+                        # Show to screen
+                        cv2.imshow('SASL Data Collection', image)
+
+                        # Export keypoints
+                        keypoints = extract_keypoints(results)
+                        npy_path = os.path.join(sequence_path, str(frame_num))
+                        np.save(npy_path, keypoints)
+
+                        # Break gracefully
+                        if cv2.waitKey(10) & 0xFF == ord('q'):
+                            cap.release()
+                            cv2.destroyAllWindows()
+                            sys.exit()
+
+                # After all sequences for this sign, ask if happy
+                print(f"\n✅ Completed all {no_sequences} videos for '{action}'")
+
+                happy_with_videos = False
+                while not happy_with_videos:
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+
+                    image, results = mediapipe_detection(frame, holistic)
+                    draw_styled_landmarks(image, results)
+
+                    h, w = image.shape[:2]
+
+                    # Review screen
+                    cv2.putText(image, f'COMPLETED: {action.upper()}', (w//2 - 250, h//2 - 120),
+                                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
+                    cv2.putText(image, f'Recorded {no_sequences} videos', (w//2 - 200, h//2 - 40),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 2, cv2.LINE_AA)
+                    cv2.putText(image, 'Are you happy with these videos?', (w//2 - 280, h//2 + 40),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255, 255, 0), 2, cv2.LINE_AA)
+                    cv2.putText(image, 'Press BACKSPACE to retake', (w//2 - 250, h//2 + 100),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                    cv2.putText(image, 'Press any other key to continue', (w//2 - 280, h//2 + 150),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+                    cv2.imshow('SASL Data Collection', image)
+
+                    key = cv2.waitKey(10)
+                    if key == 8:  # BACKSPACE
+                        print(f"🔄 Retaking videos for '{action}'...")
+                        # Delete all videos for this sign
+                        if os.path.exists(action_path):
+                            shutil.rmtree(action_path)
+                            print(f"   Deleted previous recordings for '{action}'")
+                        retake_sign = True
+                        happy_with_videos = True  # Exit this loop to restart sign
+                        break
+                    elif key != -1:  # Any other key pressed
+                        print(f"✅ Keeping videos for '{action}'. Moving to next sign...")
+                        retake_sign = False
+                        happy_with_videos = True
+                        break
 
     cap.release()
     cv2.destroyAllWindows()

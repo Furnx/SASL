@@ -8,7 +8,7 @@ Updates:
 
 import os
 import numpy as np
-import tensorflow as pd
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import TensorBoard, EarlyStopping, ModelCheckpoint

@@ -10,8 +10,8 @@ import numpy as np
 # 1. PROJECT SETUP
 # ---------------------------------------------------
 DATA_PATH = os.path.join('MP_Data')  # Folder for collected data
-MODELS_PATH = os.path.join('Models') # Folder for saved models
-LOG_PATH = os.path.join('Logs')      # Folder for logs
+MODEL_PATH = os.path.join('model')   # Folder for saved models (aligned with train.py)
+LOGS_PATH = os.path.join('logs')     # Folder for logs (aligned with train.py)
 
 # ---------------------------------------------------
 # 2. DATA COLLECTION CONFIG
@@ -19,6 +19,32 @@ LOG_PATH = os.path.join('Logs')      # Folder for logs
 no_sequences = 30       # Videos per word
 sequence_length = 30    # Frames per video
 start_folder = 0        # Start count
+
+# Uppercase aliases for train.py and predict.py compatibility
+SEQUENCE_LENGTH = sequence_length
+NO_SEQUENCES = no_sequences
+
+# ---------------------------------------------------
+# 3. MODEL TRAINING CONFIG
+# ---------------------------------------------------
+# Training hyperparameters
+EPOCHS = 200                    # Maximum training epochs
+BATCH_SIZE = 32                 # Batch size for training
+LSTM_UNITS = [64, 128, 64]      # LSTM layer units (3 layers)
+DENSE_UNITS = [64, 32]          # Dense layer units (2 layers)
+DROPOUT_RATE = 0.2              # Dropout rate to prevent overfitting
+
+# MediaPipe detection confidence
+MIN_DETECTION_CONFIDENCE = 0.5
+MIN_TRACKING_CONFIDENCE = 0.5
+
+# Total features from MediaPipe Holistic
+# Pose: 33 landmarks × 4 (x, y, z, visibility) = 132
+# Face: 468 landmarks × 3 (x, y, z) = 1404
+# Left Hand: 21 landmarks × 3 (x, y, z) = 63
+# Right Hand: 21 landmarks × 3 (x, y, z) = 63
+# Total: 132 + 1404 + 63 + 63 = 1662
+TOTAL_FEATURES = 1662
 
 # ---------------------------------------------------
 # 3. WEEKLY VOCABULARY SCHEDULE (The Master Plan)
@@ -133,6 +159,28 @@ ACTIONS = get_actions()
 # Create a map for the AI to understand labels
 label_map = {label:num for num, label in enumerate(ACTIONS)}
 
+# ---------------------------------------------------
+# 5. HELPER FUNCTIONS
+# ---------------------------------------------------
+def create_directories():
+    """
+    Creates necessary directories for the project if they don't exist.
+    Used by train.py to ensure model and log directories exist.
+    """
+    os.makedirs(DATA_PATH, exist_ok=True)
+    os.makedirs(MODEL_PATH, exist_ok=True)
+    os.makedirs(LOGS_PATH, exist_ok=True)
+    print(f"✅ Directories verified: {DATA_PATH}, {MODEL_PATH}, {LOGS_PATH}")
+
+def get_model_path():
+    """
+    Returns the path to the model file based on the active week.
+    This ensures train.py and predict.py use the same model file.
+    """
+    model_filename = f"sasl_model_{ACTIVE_WEEK}.h5"
+    return os.path.join(MODEL_PATH, model_filename)
+
 print(f"--- CONFIGURATION LOADED ---")
 print(f"Active Schedule: {ACTIVE_WEEK}")
 print(f"Target Words ({len(ACTIONS)}): {ACTIONS}")
+print(f"Model will be saved to: {get_model_path()}")
