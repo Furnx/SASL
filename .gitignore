@@ -23,3 +23,10 @@ env/
 .DS_Store
 .vscode/
 .idea/
+
+# 5. NODE/NPM FILES
+node_modules/
+dist/
+dist-ssr/
+*.local
+package-lock.json
