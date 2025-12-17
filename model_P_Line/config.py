@@ -3,387 +3,136 @@ Configuration file for WeThinkCode_ SASL Sign Language Project
 Based on 'Einstein Hands' Vocabulary (300+ signs).
 Structured for the 'No-Burnout' Weekly Plan (5 signs/week).
 """
-
 import os
 import numpy as np
 
-# =============================================================================
-# PATHS
-# =============================================================================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, 'MP_Data') 
-MODEL_PATH = os.path.join(BASE_DIR, 'model')
-LOGS_PATH = os.path.join(BASE_DIR, 'logs')
+# ---------------------------------------------------
+# 1. PROJECT SETUP
+# ---------------------------------------------------
+DATA_PATH = os.path.join('MP_Data')  # Folder for collected data
+MODELS_PATH = os.path.join('Models') # Folder for saved models
+LOG_PATH = os.path.join('Logs')      # Folder for logs
 
-# =============================================================================
-# ACTIONS / CLASSES (WEEKLY SCHEDULE)
-# =============================================================================
-# INSTRUCTIONS: 
-# Uncomment the 5 signs for the CURRENT WEEK only. 
-# Keep all other weeks commented out to prevent burnout.
+# ---------------------------------------------------
+# 2. DATA COLLECTION CONFIG
+# ---------------------------------------------------
+no_sequences = 30       # Videos per word
+sequence_length = 30    # Frames per video
+start_folder = 0        # Start count
 
-ACTIONS = np.array([
-    # -------------------------------------------------------------------------
-    # PHASE 1: THE BASICS & MANNERS
-    # -------------------------------------------------------------------------
+# ---------------------------------------------------
+# 3. WEEKLY VOCABULARY SCHEDULE (The Master Plan)
+# ---------------------------------------------------
+# Words are grouped by your 40-Week Goals.
+# We have distributed the A-Z list into these topics.
+
+VOCAB_SCHEDULE = {
+    # =========================================
+    # PHASE 1: THE FOUNDATION (Weeks 1-5)
+    # =========================================
+    "Week_1_Greetings":  ['hello', 'goodbye', 'yes', 'no', 'welcome', 'awake', 'alive', 'start'],
+    "Week_2_Manners":    ['please', 'thank_you', 'sorry', 'excuse', 'respect', 'join', 'help', 'accept'],
+    "Week_3_Questions":  ['who', 'what', 'where', 'when', 'why', 'how', 'ask', 'question', 'answer'],
+    "Week_4_Grammar":    ['because', 'but', 'and', 'if', 'or', 'about', 'maybe', 'idea', 'example'],
+    "Week_5_Pronouns":   ['i', 'you', 'me', 'mine', 'we', 'us', 'they', 'your', 'my', 'him', 'her'],
+
+    # =========================================
+    # PHASE 2: PEOPLE & FEELINGS (Weeks 6-10)
+    # =========================================
+    "Week_6_Family_A":   ['mother', 'father', 'brother', 'sister', 'family', 'parents', 'husband', 'wife'],
+    "Week_7_Family_B":   ['grandmother', 'grandfather', 'aunt', 'uncle', 'cousin', 'child', 'baby', 'friend', 'neighbor'],
+    "Week_8_Feelings_A": ['happy', 'sad', 'angry', 'afraid', 'scared', 'cry', 'laugh', 'smile'],
+    "Week_9_Feelings_B": ['tired', 'sick', 'hungry', 'thirsty', 'bored', 'busy', 'pain', 'hurt', 'feel'],
+    "Week_10_Opinions":  ['love', 'like', 'hate', 'enjoy', 'want', 'need', 'prefer', 'hope', 'wish'],
+
+    # =========================================
+    # PHASE 3: DAILY ROUTINE (Weeks 11-16)
+    # =========================================
+    "Week_11_Actions":   ['sleep', 'wake_up', 'eat', 'drink', 'bath', 'wash', 'clean', 'brush', 'rest'],
+    "Week_12_Home_A":    ['home', 'house', 'kitchen', 'bedroom', 'bathroom', 'toilet', 'room', 'door'],
+    "Week_13_Home_B":    ['window', 'table', 'chair', 'bed', 'light', 'lamp', 'key', 'lock', 'floor'],
+    "Week_14_Tech":      ['computer', 'phone', 'tv', 'radio', 'internet', 'video', 'email', 'message', 'call'],
+    "Week_15_Clothing_A":['shirt', 'pants', 'dress', 'shoes', 'socks', 'clothes', 'wear', 'change'],
+    "Week_16_Clothing_B":['jacket', 'hat', 'coat', 'glasses', 'bag', 'purse', 'watch', 'umbrella'],
+
+    # =========================================
+    # PHASE 4: FOOD & NATURE (Weeks 17-22)
+    # =========================================
+    "Week_17_Fruit":     ['apple', 'banana', 'orange', 'grape', 'fruit', 'lemon', 'peach', 'strawberry'],
+    "Week_18_Veg":       ['carrot', 'potato', 'tomato', 'onion', 'pumpkin', 'vegetable', 'cabbage', 'corn'],
+    "Week_19_Meals":     ['bread', 'meat', 'chicken', 'fish', 'egg', 'cheese', 'sandwich', 'soup', 'salad'],
+    "Week_20_Drinks":    ['water', 'milk', 'juice', 'tea', 'coffee', 'sugar', 'soda', 'wine', 'beer'],
+    "Week_21_Nature_A":  ['sun', 'moon', 'rain', 'wind', 'cloud', 'sky', 'star', 'weather', 'hot', 'cold'],
+    "Week_22_Nature_B":  ['tree', 'flower', 'grass', 'fire', 'river', 'sea', 'beach', 'mountain', 'ground'],
+
+    # =========================================
+    # PHASE 5: TIME & PLACES (Weeks 23-28)
+    # =========================================
+    "Week_23_Time_A":    ['today', 'tomorrow', 'yesterday', 'now', 'later', 'soon', 'before', 'after'],
+    "Week_24_Time_B":    ['morning', 'afternoon', 'evening', 'night', 'day', 'noon', 'midnight', 'time'],
+    "Week_25_Calendar":  ['week', 'month', 'year', 'birthday', 'holiday', 'monday', 'friday', 'weekend'],
+    "Week_26_School":    ['teacher', 'student', 'class', 'book', 'pen', 'paper', 'learn', 'write', 'read', 'study'],
+    "Week_27_Work":      ['work', 'job', 'boss', 'office', 'meeting', 'computer', 'email', 'salary'],
+    "Week_28_Places":    ['school', 'shop', 'hospital', 'police', 'church', 'bank', 'restaurant', 'city', 'town'],
+
+    # =========================================
+    # PHASE 6: TRANSPORT & MOVEMENT (Weeks 29-32)
+    # =========================================
+    "Week_29_Vehicles":  ['car', 'bus', 'taxi', 'train', 'plane', 'bike', 'truck', 'drive', 'ride'],
+    "Week_30_Directions":['left', 'right', 'up', 'down', 'straight', 'stop', 'go', 'come', 'stay'],
+    "Week_31_Travel":    ['visit', 'travel', 'holiday', 'trip', 'ticket', 'passport', 'arrive', 'leave'],
+    "Week_32_Movement":  ['walk', 'run', 'jump', 'sit', 'stand', 'dance', 'play', 'fall', 'climb'],
+
+    # =========================================
+    # PHASE 7: ANIMALS & DESCRIPTIONS (Weeks 33-37)
+    # =========================================
+    "Week_33_Pets":      ['cat', 'dog', 'bird', 'fish', 'rabbit', 'mouse', 'pet', 'feed'],
+    "Week_34_Farm":      ['cow', 'pig', 'sheep', 'goat', 'chicken', 'horse', 'duck', 'farm'],
+    "Week_35_Wild":      ['lion', 'elephant', 'monkey', 'giraffe', 'zebra', 'snake', 'crocodile', 'hippo'],
+    "Week_36_Desc_A":    ['big', 'small', 'good', 'bad', 'fast', 'slow', 'loud', 'quiet'],
+    "Week_37_Desc_B":    ['same', 'different', 'open', 'closed', 'full', 'empty', 'new', 'old', 'beautiful'],
+
+    # =========================================
+    # PHASE 8: ADVANCED & HEALTH (Weeks 38-40)
+    # =========================================
+    "Week_38_Health":    ['doctor', 'nurse', 'medicine', 'hospital', 'clinic', 'body', 'head', 'stomach', 'blood'],
+    "Week_39_Verbs_Mix": ['give', 'take', 'make', 'do', 'try', 'know', 'think', 'remember', 'forget'],
+    "Week_40_Final_Mix": ['funny', 'cool', 'luck', 'congratulations', 'finish', 'end', 'problem', 'solve']
+}
+
+# ---------------------------------------------------
+# 4. ACTIVE CONFIGURATION (CONTROL PANEL)
+# ---------------------------------------------------
+
+# !!! CHANGE THIS VARIABLE TO WORK ON A SPECIFIC WEEK !!!
+# Options: 'Week_1_Greetings', 'Week_2_Manners', 'All', etc.
+ACTIVE_WEEK = 'Week_1_Greetings'
+
+def get_actions():
+    """
+    Returns the list of words based on the ACTIVE_WEEK setting.
+    This is what the Model will look at.
+    """
+    if ACTIVE_WEEK == 'All':
+        # Flatten all lists into one big array
+        all_words = []
+        for week in VOCAB_SCHEDULE.values():
+            all_words.extend(week)
+        return np.array(all_words)
     
-    # --- WEEK 1: Golden Rules ---
-    #'hello', 
-    #'goodbye', 
-    #'yes', 
-    #'no', 
-    #'please',
-
-    # --- WEEK 2: Manners ---
-    'thank_you', 
-    'sorry', 
-    'welcome', 
-    'help', 
-    'excuse_me',
-
-    # --- WEEK 3: Questions 1 ---
-    # 'who', 
-    # 'what', 
-    # 'where', 
-    # 'when', 
-    # 'why',
-
-    # --- WEEK 4: Questions 2 ---
-    # 'how', 
-    # 'which', 
-    # 'how_many', 
-    # 'how_much', 
-    # 'how_old',
-
-    # --- WEEK 5: Pronouns ---
-    # 'i', 
-    # 'you', 
-    # 'he', 
-    # 'she', 
-    # 'we',
-
-    # -------------------------------------------------------------------------
-    # PHASE 2: PEOPLE & FEELINGS
-    # -------------------------------------------------------------------------
-
-    # --- WEEK 6: Family 1 ---
-    # 'mother', 
-    # 'father', 
-    # 'brother', 
-    # 'sister', 
-    # 'family',
-
-    # --- WEEK 7: Family 2 ---
-    # 'grandmother', 
-    # 'grandfather', 
-    # 'aunt', 
-    # 'uncle', 
-    # 'cousin',
-
-    # --- WEEK 8: Emotions 1 ---
-    # 'happy', 
-    # 'sad', 
-    # 'angry', 
-    # 'scared', 
-    # 'excited',
-
-    # --- WEEK 9: Emotions 2 ---
-    # 'tired', 
-    # 'sick', 
-    # 'hungry', 
-    # 'thirsty', 
-    # 'bored',
-
-    # --- WEEK 10: Love & Likes ---
-    # 'love', 
-    # 'hate', 
-    # 'like', 
-    # 'dislike', 
-    # 'enjoy',
-
-    # -------------------------------------------------------------------------
-    # PHASE 3: DAILY LIFE
-    # -------------------------------------------------------------------------
-
-    # --- WEEK 11: Routine ---
-    # 'wake_up', 
-    # 'sleep', 
-    # 'eat', 
-    # 'drink', 
-    # 'wash',
-
-    # --- WEEK 12: Home 1 ---
-    # 'home', 
-    # 'house', 
-    # 'kitchen', 
-    # 'bedroom', 
-    # 'bathroom',
-
-    # --- WEEK 13: Home 2 ---
-    # 'door', 
-    # 'window', 
-    # 'table', 
-    # 'chair', 
-    # 'bed',
-
-    # --- WEEK 14: Technology ---
-    # 'computer', 
-    # 'phone', 
-    # 'tv', 
-    # 'radio', 
-    # 'light',
-
-    # --- WEEK 15: Clothing 1 ---
-    # 'shirt', 
-    # 'pants', 
-    # 'dress', 
-    # 'shoes', 
-    # 'socks',
-
-    # --- WEEK 16: Clothing 2 ---
-    # 'jacket', 
-    # 'hat', 
-    # 'coat', 
-    # 'pyjamas', 
-    # 'glasses',
-
-    # -------------------------------------------------------------------------
-    # PHASE 4: FOOD & NATURE
-    # -------------------------------------------------------------------------
-
-    # --- WEEK 17: Fruit 1 ---
-    # 'apple', 
-    # 'banana', 
-    # 'orange', 
-    # 'grape', 
-    # 'pear',
-
-    # --- WEEK 18: Vegetables ---
-    # 'carrot', 
-    # 'potato', 
-    # 'tomato', 
-    # 'onion', 
-    # 'pumpkin',
-
-    # --- WEEK 19: Meals ---
-    # 'bread', 
-    # 'meat', 
-    # 'chicken', 
-    # 'fish', 
-    # 'egg',
-
-    # --- WEEK 20: Drinks ---
-    # 'water', 
-    # 'milk', 
-    # 'juice', 
-    # 'tea', 
-    # 'coffee',
-
-    # --- WEEK 21: Nature 1 ---
-    # 'sun', 
-    # 'moon', 
-    # 'rain', 
-    # 'wind', 
-    # 'cloud',
-
-    # --- WEEK 22: Nature 2 ---
-    # 'tree', 
-    # 'flower', 
-    # 'grass', 
-    # 'fire', 
-    # 'water',
-
-    # -------------------------------------------------------------------------
-    # PHASE 5: TIME, SCHOOL & PLACES
-    # -------------------------------------------------------------------------
-
-    # --- WEEK 23: Time 1 ---
-    # 'today', 
-    # 'tomorrow', 
-    # 'yesterday', 
-    # 'now', 
-    # 'later',
-
-    # --- WEEK 24: Time 2 ---
-    # 'morning', 
-    # 'afternoon', 
-    # 'evening', 
-    # 'day', 
-    # 'night',
-
-    # --- WEEK 25: Calendar ---
-    # 'week', 
-    # 'month', 
-    # 'year', 
-    # 'birthday', 
-    # 'holiday',
-
-    # --- WEEK 26: School ---
-    # 'teacher', 
-    # 'student', 
-    # 'class', 
-    # 'book', 
-    # 'pen',
-
-    # --- WEEK 27: Actions (Cognitive) ---
-    # 'learn', 
-    # 'write', 
-    # 'read', 
-    # 'think', 
-    # 'know',
-
-    # --- WEEK 28: Places ---
-    # 'school', 
-    # 'shop', 
-    # 'hospital', 
-    # 'police_station', 
-    # 'church',
-
-    # --- WEEK 29: Transport ---
-    # 'car', 
-    # 'bus', 
-    # 'taxi', 
-    # 'train', 
-    # 'aeroplane',
-
-    # --- WEEK 30: Colours ---
-    # 'red', 
-    # 'blue', 
-    # 'green', 
-    # 'yellow', 
-    # 'black',
-
-    # -------------------------------------------------------------------------
-    # PHASE 6: ANIMALS (THE FUN PART)
-    # -------------------------------------------------------------------------
-
-    # --- WEEK 31: Pets ---
-    # 'cat', 
-    # 'dog', 
-    # 'bird', 
-    # 'fish', 
-    # 'rabbit',
-
-    # --- WEEK 32: Farm ---
-    # 'cow', 
-    # 'pig', 
-    # 'sheep', 
-    # 'goat', 
-    # 'chicken',
-
-    # --- WEEK 33: Wild 1 ---
-    # 'lion', 
-    # 'elephant', 
-    # 'monkey', 
-    # 'giraffe', 
-    # 'zebra',
-
-    # --- WEEK 34: Wild 2 ---
-    # 'hippo', 
-    # 'rhino', 
-    # 'snake', 
-    # 'crocodile', 
-    # 'frog',
-
-    # -------------------------------------------------------------------------
-    # PHASE 7: ADVANCED DESCRIPTIONS & HEALTH
-    # -------------------------------------------------------------------------
-
-    # --- WEEK 35: Descriptions 1 ---
-    # 'big', 
-    # 'small', 
-    # 'good', 
-    # 'bad', 
-    # 'hot',
-
-    # --- WEEK 36: Descriptions 2 ---
-    # 'cold', 
-    # 'clean', 
-    # 'dirty', 
-    # 'fast', 
-    # 'slow',
-
-    # --- WEEK 37: Descriptions 3 ---
-    # 'same', 
-    # 'different', 
-    # 'open', 
-    # 'closed', 
-    # 'full',
-
-    # --- WEEK 38: Health ---
-    # 'doctor', 
-    # 'nurse', 
-    # 'medicine', 
-    # 'pain', 
-    # 'hospital',
-
-    # --- WEEK 39: Action Verbs 1 ---
-    # 'go', 
-    # 'come', 
-    # 'stop', 
-    # 'start', 
-    # 'wait',
-
-    # --- WEEK 40: Action Verbs 2 ---
-    # 'give', 
-    # 'take', 
-    # 'make', 
-    # 'buy', 
-    # 'sell',
-])
-
-# =============================================================================
-# DATA COLLECTION PARAMETERS
-# =============================================================================
-# 30 videos per person per sign
-# If 30 people participate: 30 * 30 = 900 samples per sign (Excellent depth)
-NO_SEQUENCES = 30        
-SEQUENCE_LENGTH = 30     # Frames (approx 1 sec)
-COLLECTION_PAUSE = 2     # Seconds break
-
-# =============================================================================
-# MEDIAPIPE PARAMETERS
-# =============================================================================
-MIN_DETECTION_CONFIDENCE = 0.5
-MIN_TRACKING_CONFIDENCE = 0.5
-
-# =============================================================================
-# MODEL ARCHITECTURE
-# =============================================================================
-# Heavy architecture for 200+ classes
-LSTM_UNITS = [128, 256, 128]  
-DENSE_UNITS = [256, 128]      
-DROPOUT_RATE = 0.2            
-
-# =============================================================================
-# TRAINING HYPERPARAMETERS
-# =============================================================================
-EPOCHS = 2000                 
-BATCH_SIZE = 64               
-LEARNING_RATE = 1e-4          
-EARLY_STOPPING_PATIENCE = 100
-
-# =============================================================================
-# FEATURE DIMENSIONS
-# =============================================================================
-POSE_LANDMARKS = 33
-FACE_LANDMARKS = 468
-HAND_LANDMARKS = 21
-TOTAL_FEATURES = 1662 
-
-# =============================================================================
-# HELPER FUNCTIONS
-# =============================================================================
-def create_directories():
-    for path in [DATA_PATH, MODEL_PATH, LOGS_PATH]:
-        if not os.path.exists(path):
-            os.makedirs(path)
+    elif ACTIVE_WEEK in VOCAB_SCHEDULE:
+        # Return only the specific week's words
+        return np.array(VOCAB_SCHEDULE[ACTIVE_WEEK])
     
-    # Create action subdirectories for UNCOMMENTED actions only
-    for action in ACTIONS:
-        action_path = os.path.join(DATA_PATH, action)
-        if not os.path.exists(action_path):
-            os.makedirs(action_path)
+    else:
+        raise ValueError(f"Week '{ACTIVE_WEEK}' not found in schedule.")
 
-def get_model_path(filename='sasl_model_v1.h5'):
-    return os.path.join(MODEL_PATH, filename)
+# The final list used by main.py
+ACTIONS = get_actions()
+
+# Create a map for the AI to understand labels
+label_map = {label:num for num, label in enumerate(ACTIONS)}
+
+print(f"--- CONFIGURATION LOADED ---")
+print(f"Active Schedule: {ACTIVE_WEEK}")
+print(f"Target Words ({len(ACTIONS)}): {ACTIONS}")

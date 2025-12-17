@@ -5,27 +5,17 @@ Updates:
   - improved UX (Wait for Spacebar)
   - Auto-creates config if missing
 """
-
 import cv2
 import numpy as np
 import os
-import time
 import sys
+import time
 
 # --------------------------------------------------------------------------
-# CONFIGURATION BLOCK (Self-Contained for easier sharing)
+# IMPORT CONFIGURATION (Connects to config.py)
 # --------------------------------------------------------------------------
-# Path for exported data, numpy arrays
-DATA_PATH = os.path.join('MP_Data') 
-
-# Actions that we try to detect (Edit these for your weekly batch)
-ACTIONS = np.array(['thank_you', 'thank_you', 'iloveyou'])
-
-# Thirty videos worth of data
-no_sequences = 30
-
-# Videos are going to be 30 frames in length
-sequence_length = 30
+# We import variables directly so you don't have to edit this file ever again.
+from config import ACTIONS, DATA_PATH, no_sequences, sequence_length
 
 # --------------------------------------------------------------------------
 # MEDIAPIPE SETUP
@@ -74,7 +64,9 @@ def main():
     # 1. GET USER ID (CRITICAL FOR TEAMWORK)
     print("="*50)
     print("WETHINKCODE_ SIGN LANGUAGE COLLECTOR")
+    print(f"TARGET WORDS: {ACTIONS}") # Show user what they are recording
     print("="*50)
+    
     user_name = input("Enter your First Name (e.g., Thabo): ").strip().replace(" ", "_")
     if not user_name:
         print("Error: Name is required to prevent data overwrites!")
@@ -92,7 +84,7 @@ def main():
     # Set mediapipe model 
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         
-        # Loop through actions
+        # Loop through actions (Pulled from config.py)
         for action in ACTIONS:
             print(f"\n--- PREPARING FOR ACTION: {action} ---")
             
@@ -105,7 +97,6 @@ def main():
             for sequence in range(no_sequences):
                 
                 # 2. CREATE UNIQUE FOLDER NAME: User_Sequence (e.g., Thabo_0)
-                # This ensures Thabo_0 doesn't overwrite Sarah_0 in the cloud
                 folder_name = f"{user_name}_{sequence}"
                 sequence_path = os.path.join(action_path, folder_name)
                 
@@ -130,11 +121,11 @@ def main():
                             # Show "Waiting" Screen
                             display_image = image.copy()
                             cv2.putText(display_image, f'COLLECTING: {action}', (120,200), 
-                                       cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255, 0), 4, cv2.LINE_AA)
+                                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255, 0), 4, cv2.LINE_AA)
                             cv2.putText(display_image, f'Video {sequence+1} of {no_sequences}', (120,250), 
-                                       cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 1, cv2.LINE_AA)
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 1, cv2.LINE_AA)
                             cv2.putText(display_image, 'Press "SPACE" to Record', (120,300), 
-                                       cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
                             
                             cv2.imshow('OpenCV Feed', display_image)
                             
