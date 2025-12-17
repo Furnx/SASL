@@ -70,7 +70,7 @@ def main():
     print(f"TARGET WORDS: {ACTIONS}") # Show user what they are recording
     print("="*50)
     
-    user_name = input("Enter your First Name (e.g., Thabo): ").strip().replace(" ", "_")
+    user_name = input("Enter your Email (e.g., tumomogame9@gmai.com): ").strip().replace(" ", "_")
     if not user_name:
         print("Error: Name is required to prevent data overwrites!")
         return
