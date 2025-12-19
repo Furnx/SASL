@@ -6,6 +6,7 @@ Updates:
   - Space key to start/continue recording
   - Review and retake option after each sign
   - Backspace to retake, any other key to continue
+  - Demonstration video shown alongside camera feed
 """
 import cv2
 import numpy as np
@@ -18,7 +19,7 @@ import shutil
 # IMPORT CONFIGURATION (Connects to config.py)
 # --------------------------------------------------------------------------
 # We import variables directly so you don't have to edit this file ever again.
-from config import ACTIONS, DATA_PATH, no_sequences, sequence_length
+from config import ACTIONS, DATA_PATH, no_sequences, sequence_length, get_demo_video_path
 
 # --------------------------------------------------------------------------
 # MEDIAPIPE SETUP
@@ -61,6 +62,70 @@ def extract_keypoints(results):
     return np.concatenate([pose, face, lh, rh])
 
 # --------------------------------------------------------------------------
+# DEMONSTRATION VIDEO HELPER
+# --------------------------------------------------------------------------
+def get_demo_frame(demo_cap, target_height):
+    """
+    Get the next frame from the demonstration video.
+    Loops the video when it reaches the end.
+    Resizes to match the target height while maintaining aspect ratio.
+
+    Args:
+        demo_cap: cv2.VideoCapture object for the demo video
+        target_height: Height to resize the demo frame to
+
+    Returns:
+        Resized demo frame, or None if video can't be read
+    """
+    if demo_cap is None or not demo_cap.isOpened():
+        return None
+
+    ret, demo_frame = demo_cap.read()
+
+    # If video ended, loop back to start
+    if not ret:
+        demo_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        ret, demo_frame = demo_cap.read()
+        if not ret:
+            return None
+
+    # Resize demo frame to match target height while maintaining aspect ratio
+    demo_h, demo_w = demo_frame.shape[:2]
+    aspect_ratio = demo_w / demo_h
+    new_width = int(target_height * aspect_ratio)
+    demo_frame_resized = cv2.resize(demo_frame, (new_width, target_height))
+
+    return demo_frame_resized
+
+def combine_frames(camera_frame, demo_frame):
+    """
+    Combine camera frame and demo frame side by side.
+
+    Args:
+        camera_frame: The webcam frame with MediaPipe landmarks
+        demo_frame: The demonstration video frame
+
+    Returns:
+        Combined frame with demo on left, camera on right
+    """
+    if demo_frame is None:
+        # If no demo video, just return camera frame
+        return camera_frame
+
+    cam_h, cam_w = camera_frame.shape[:2]
+    demo_h, demo_w = demo_frame.shape[:2]
+
+    # Make sure both frames have the same height
+    if demo_h != cam_h:
+        demo_frame = cv2.resize(demo_frame, (int(demo_w * cam_h / demo_h), cam_h))
+        demo_h, demo_w = demo_frame.shape[:2]
+
+    # Create combined frame: demo on left, camera on right
+    combined = np.hstack((demo_frame, camera_frame))
+
+    return combined
+
+# --------------------------------------------------------------------------
 # MAIN LOGIC
 # --------------------------------------------------------------------------
 def main():
@@ -95,6 +160,20 @@ def main():
         for action in ACTIONS:
             print(f"\n--- PREPARING FOR ACTION: {action} ---")
 
+            # Load demonstration video for this action
+            demo_video_path = get_demo_video_path(action)
+            demo_cap = None
+
+            if demo_video_path:
+                demo_cap = cv2.VideoCapture(demo_video_path)
+                if demo_cap.isOpened():
+                    print(f"✅ Loaded demonstration video: {demo_video_path}")
+                else:
+                    print(f"⚠️  Could not open demonstration video: {demo_video_path}")
+                    demo_cap = None
+            else:
+                print(f"⚠️  No demonstration video found for '{action}'")
+
             # Flag to control retake
             retake_sign = True
 
@@ -114,26 +193,42 @@ def main():
                     image, results = mediapipe_detection(frame, holistic)
                     draw_styled_landmarks(image, results)
 
+                    # Get demo frame if available
+                    demo_frame = get_demo_frame(demo_cap, image.shape[0])
+
+                    # Combine camera and demo frames
+                    combined_frame = combine_frames(image, demo_frame)
+
                     # Get screen dimensions for centering text
-                    h, w = image.shape[:2]
+                    h, w = combined_frame.shape[:2]
 
                     # Show instruction screen
-                    cv2.putText(image, f'SIGN: {action.upper()}', (w//2 - 200, h//2 - 100),
+                    cv2.putText(combined_frame, f'SIGN: {action.upper()}', (w//2 - 200, h//2 - 100),
                                 cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
-                    cv2.putText(image, f'You will record {no_sequences} videos', (w//2 - 250, h//2),
+                    cv2.putText(combined_frame, f'You will record {no_sequences} videos', (w//2 - 250, h//2),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-                    cv2.putText(image, 'Press SPACE to start recording', (w//2 - 280, h//2 + 60),
+                    cv2.putText(combined_frame, 'Press SPACE to start recording', (w//2 - 280, h//2 + 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-                    cv2.putText(image, 'Press Q to quit', (w//2 - 150, h//2 + 120),
+                    cv2.putText(combined_frame, 'Press Q to quit', (w//2 - 150, h//2 + 120),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (100, 100, 100), 2, cv2.LINE_AA)
 
-                    cv2.imshow('SASL Data Collection', image)
+                    # Add labels for demo and camera sections
+                    if demo_frame is not None:
+                        cv2.putText(combined_frame, 'DEMONSTRATION', (50, 50),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv2.LINE_AA)
+                        demo_w = demo_frame.shape[1]
+                        cv2.putText(combined_frame, 'YOUR CAMERA', (demo_w + 50, 50),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv2.LINE_AA)
+
+                    cv2.imshow('SASL Data Collection', combined_frame)
 
                     key = cv2.waitKey(10)
                     if key == 32:  # SPACE bar
                         break
                     if key == ord('q'):
                         cap.release()
+                        if demo_cap:
+                            demo_cap.release()
                         cv2.destroyAllWindows()
                         sys.exit()
 
@@ -151,32 +246,43 @@ def main():
                     # Countdown between videos (3 seconds)
                     if sequence > 0:  # Don't countdown before first sequence (already waited above)
                         for countdown in range(3, 0, -1):
-                            ret, frame = cap.read()
-                            if not ret:
-                                break
+                            # Record start time for this countdown second
+                            start_time = time.time()
 
-                            image, results = mediapipe_detection(frame, holistic)
-                            draw_styled_landmarks(image, results)
+                            # Keep updating the display for 1 second to keep demo video smooth
+                            while time.time() - start_time < 1.0:
+                                ret, frame = cap.read()
+                                if not ret:
+                                    break
 
-                            h, w = image.shape[:2]
+                                image, results = mediapipe_detection(frame, holistic)
+                                draw_styled_landmarks(image, results)
 
-                            # Show countdown
-                            cv2.putText(image, f'SIGN: {action.upper()}', (w//2 - 200, h//2 - 150),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
-                            cv2.putText(image, f'Video {sequence + 1} of {no_sequences}', (w//2 - 200, h//2 - 50),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 2, cv2.LINE_AA)
-                            cv2.putText(image, f'Starting in {countdown}...', (w//2 - 180, h//2 + 50),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4, cv2.LINE_AA)
-                            cv2.putText(image, 'Get ready!', (w//2 - 120, h//2 + 130),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 0), 3, cv2.LINE_AA)
+                                # Get demo frame and combine
+                                demo_frame = get_demo_frame(demo_cap, image.shape[0])
+                                combined_frame = combine_frames(image, demo_frame)
 
-                            cv2.imshow('SASL Data Collection', image)
+                                h, w = combined_frame.shape[:2]
 
-                            # Check for quit during countdown
-                            if cv2.waitKey(1000) & 0xFF == ord('q'):
-                                cap.release()
-                                cv2.destroyAllWindows()
-                                sys.exit()
+                                # Show countdown
+                                cv2.putText(combined_frame, f'SIGN: {action.upper()}', (w//2 - 200, h//2 - 150),
+                                            cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
+                                cv2.putText(combined_frame, f'Video {sequence + 1} of {no_sequences}', (w//2 - 200, h//2 - 50),
+                                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 2, cv2.LINE_AA)
+                                cv2.putText(combined_frame, f'Starting in {countdown}...', (w//2 - 180, h//2 + 50),
+                                            cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4, cv2.LINE_AA)
+                                cv2.putText(combined_frame, 'Get ready!', (w//2 - 120, h//2 + 130),
+                                            cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 0), 3, cv2.LINE_AA)
+
+                                cv2.imshow('SASL Data Collection', combined_frame)
+
+                                # Check for quit during countdown (short wait to keep video smooth)
+                                if cv2.waitKey(10) & 0xFF == ord('q'):
+                                    cap.release()
+                                    if demo_cap:
+                                        demo_cap.release()
+                                    cv2.destroyAllWindows()
+                                    sys.exit()
 
                     # Loop through video length (sequence_length)
                     for frame_num in range(sequence_length):
@@ -190,16 +296,20 @@ def main():
                         image, results = mediapipe_detection(frame, holistic)
                         draw_styled_landmarks(image, results)
 
-                        h, w = image.shape[:2]
+                        # Get demo frame and combine
+                        demo_frame = get_demo_frame(demo_cap, image.shape[0])
+                        combined_frame = combine_frames(image, demo_frame)
+
+                        h, w = combined_frame.shape[:2]
 
                         # RECORDING FEEDBACK
-                        cv2.putText(image, f'RECORDING: {action.upper()}', (50, 50),
+                        cv2.putText(combined_frame, f'RECORDING: {action.upper()}', (50, 50),
                                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
-                        cv2.putText(image, f'Video {sequence + 1}/{no_sequences} | Frame {frame_num + 1}/{sequence_length}', (50, 100),
+                        cv2.putText(combined_frame, f'Video {sequence + 1}/{no_sequences} | Frame {frame_num + 1}/{sequence_length}', (50, 100),
                                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
                         # Show to screen
-                        cv2.imshow('SASL Data Collection', image)
+                        cv2.imshow('SASL Data Collection', combined_frame)
 
                         # Export keypoints
                         keypoints = extract_keypoints(results)
@@ -209,6 +319,8 @@ def main():
                         # Break gracefully
                         if cv2.waitKey(10) & 0xFF == ord('q'):
                             cap.release()
+                            if demo_cap:
+                                demo_cap.release()
                             cv2.destroyAllWindows()
                             sys.exit()
 
@@ -224,21 +336,25 @@ def main():
                     image, results = mediapipe_detection(frame, holistic)
                     draw_styled_landmarks(image, results)
 
-                    h, w = image.shape[:2]
+                    # Get demo frame and combine
+                    demo_frame = get_demo_frame(demo_cap, image.shape[0])
+                    combined_frame = combine_frames(image, demo_frame)
+
+                    h, w = combined_frame.shape[:2]
 
                     # Review screen
-                    cv2.putText(image, f'COMPLETED: {action.upper()}', (w//2 - 250, h//2 - 120),
+                    cv2.putText(combined_frame, f'COMPLETED: {action.upper()}', (w//2 - 250, h//2 - 120),
                                 cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
-                    cv2.putText(image, f'Recorded {no_sequences} videos', (w//2 - 200, h//2 - 40),
+                    cv2.putText(combined_frame, f'Recorded {no_sequences} videos', (w//2 - 200, h//2 - 40),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 2, cv2.LINE_AA)
-                    cv2.putText(image, 'Are you happy with these videos?', (w//2 - 280, h//2 + 40),
+                    cv2.putText(combined_frame, 'Are you happy with these videos?', (w//2 - 280, h//2 + 40),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255, 255, 0), 2, cv2.LINE_AA)
-                    cv2.putText(image, 'Press BACKSPACE to retake', (w//2 - 250, h//2 + 100),
+                    cv2.putText(combined_frame, 'Press BACKSPACE to retake', (w//2 - 250, h//2 + 100),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-                    cv2.putText(image, 'Press any other key to continue', (w//2 - 280, h//2 + 150),
+                    cv2.putText(combined_frame, 'Press any other key to continue', (w//2 - 280, h//2 + 150),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    cv2.imshow('SASL Data Collection', image)
+                    cv2.imshow('SASL Data Collection', combined_frame)
 
                     key = cv2.waitKey(10)
                     if key == 8:  # BACKSPACE
@@ -255,6 +371,11 @@ def main():
                         retake_sign = False
                         happy_with_videos = True
                         break
+
+            # Release demo video capture for this action
+            if demo_cap:
+                demo_cap.release()
+                print(f"✅ Released demonstration video for '{action}'")
 
     cap.release()
     cv2.destroyAllWindows()

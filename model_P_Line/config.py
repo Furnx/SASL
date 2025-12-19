@@ -12,6 +12,7 @@ import numpy as np
 DATA_PATH = os.path.join('MP_Data')  # Folder for collected data
 MODEL_PATH = os.path.join('model')   # Folder for saved models (aligned with train.py)
 LOGS_PATH = os.path.join('logs')     # Folder for logs (aligned with train.py)
+DEMO_VIDEOS_PATH = os.path.join('Demonstration_videos')  # Folder for demonstration videos
 
 # ---------------------------------------------------
 # 2. DATA COLLECTION CONFIG
@@ -51,6 +52,13 @@ TOTAL_FEATURES = 1662
 # ---------------------------------------------------
 # Words are grouped by your 40-Week Goals.
 # We have distributed the A-Z list into these topics.
+
+
+
+#===================================================
+# https://learnsasl.com/ for videos 
+#===================================================
+
 
 VOCAB_SCHEDULE = {
     # =========================================
@@ -179,6 +187,25 @@ def get_model_path():
     """
     model_filename = f"sasl_model_{ACTIVE_WEEK}.h5"
     return os.path.join(MODEL_PATH, model_filename)
+
+def get_demo_video_path(action):
+    """
+    Returns the path to the demonstration video for a specific action/sign.
+    Returns None if the video doesn't exist.
+
+    Args:
+        action (str): The sign/action name (e.g., 'hello', 'goodbye')
+
+    Returns:
+        str or None: Path to the video file, or None if not found
+    """
+    video_filename = f"{action}.mp4"
+    video_path = os.path.join(DEMO_VIDEOS_PATH, ACTIVE_WEEK, video_filename)
+
+    if os.path.exists(video_path):
+        return video_path
+    else:
+        return None
 
 print(f"--- CONFIGURATION LOADED ---")
 print(f"Active Schedule: {ACTIVE_WEEK}")
