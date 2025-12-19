@@ -112,7 +112,7 @@ VOCAB_SCHEDULE = {
     # =========================================
     # PHASE 6: TRANSPORT & MOVEMENT (Weeks 29-32)
     # =========================================
-    "Week_29_Vehicles":  ['car', 'bus', 'taxi', 'train', 'plane', 'bike', 'truck', 'drive', 'ride'],
+    "Week_29_Vehicles":  ['car', 'bus', 'taxi', 'train', 'flight', 'bicycle', 'truck', 'drive', 'ride'],
     "Week_30_Directions":['left', 'right', 'up', 'down', 'straight', 'stop', 'go', 'come', 'stay'],
     "Week_31_Travel":    ['visit', 'travel', 'holiday', 'trip', 'ticket', 'passport', 'arrive', 'leave'],
     "Week_32_Movement":  ['walk', 'run', 'jump', 'sit', 'stand', 'dance', 'play', 'fall', 'climb'],
