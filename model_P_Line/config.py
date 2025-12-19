@@ -65,7 +65,7 @@ VOCAB_SCHEDULE = {
     # PHASE 1: THE FOUNDATION (Weeks 1-5)
     # =========================================
     "Week_1_Greetings":  ['hello', 'goodbye', 'yes', 'no', 'welcome', 'awake', 'alive', 'start'],
-    "Week_2_Manners":    ['please', 'thank_you', 'sorry', 'excuse', 'respect', 'join', 'help', 'accept'],
+    "Week_2_Manners":    ['please', 'thank_you', 'sorry', 'excuse_me', 'respect', 'join', 'help', 'accept'],
     "Week_3_Questions":  ['who', 'what', 'where', 'when', 'why', 'how', 'ask', 'question', 'answer'],
     "Week_4_Grammar":    ['because', 'but', 'and', 'if', 'or', 'about', 'maybe', 'idea', 'example'],
     "Week_5_Pronouns":   ['i', 'you', 'me', 'mine', 'we', 'us', 'they', 'your', 'my', 'him', 'her'],
