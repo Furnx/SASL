@@ -1,7 +1,7 @@
 """
 Configuration file for WeThinkCode_ SASL Sign Language Project
 Based on 'Einstein Hands' Vocabulary (300+ signs).
-Structured for the 'No-Burnout' Weekly Plan (5 signs/week).
+Structured for the 'No-Burnout' Weekly Plan (5 signs/week) ...
 """
 import os
 import numpy as np
