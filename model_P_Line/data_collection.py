@@ -68,11 +68,11 @@ def get_demo_frame(demo_cap, target_height):
     """
     Get the next frame from the demonstration video.
     Loops the video when it reaches the end.
-    Resizes to match the target height while maintaining aspect ratio.
+    Resizes to be smaller (40% of target height) while maintaining aspect ratio.
 
     Args:
         demo_cap: cv2.VideoCapture object for the demo video
-        target_height: Height to resize the demo frame to
+        target_height: Height of the camera frame (demo will be 40% of this)
 
     Returns:
         Resized demo frame, or None if video can't be read
@@ -89,24 +89,28 @@ def get_demo_frame(demo_cap, target_height):
         if not ret:
             return None
 
-    # Resize demo frame to match target height while maintaining aspect ratio
+    # Resize demo frame to be smaller (40% of camera height) while maintaining aspect ratio
     demo_h, demo_w = demo_frame.shape[:2]
     aspect_ratio = demo_w / demo_h
-    new_width = int(target_height * aspect_ratio)
-    demo_frame_resized = cv2.resize(demo_frame, (new_width, target_height))
+
+    # Make demo video 40% of the camera height
+    demo_target_height = int(target_height * 0.4)
+    new_width = int(demo_target_height * aspect_ratio)
+    demo_frame_resized = cv2.resize(demo_frame, (new_width, demo_target_height))
 
     return demo_frame_resized
 
 def combine_frames(camera_frame, demo_frame):
     """
     Combine camera frame and demo frame side by side.
+    Camera frame is large (main focus), demo frame is smaller (reference).
 
     Args:
-        camera_frame: The webcam frame with MediaPipe landmarks
-        demo_frame: The demonstration video frame
+        camera_frame: The webcam frame with MediaPipe landmarks (LARGE)
+        demo_frame: The demonstration video frame (SMALL - 40% height)
 
     Returns:
-        Combined frame with demo on left, camera on right
+        Combined frame with camera on left (large), demo on right (small)
     """
     if demo_frame is None:
         # If no demo video, just return camera frame
@@ -115,13 +119,27 @@ def combine_frames(camera_frame, demo_frame):
     cam_h, cam_w = camera_frame.shape[:2]
     demo_h, demo_w = demo_frame.shape[:2]
 
-    # Make sure both frames have the same height
-    if demo_h != cam_h:
-        demo_frame = cv2.resize(demo_frame, (int(demo_w * cam_h / demo_h), cam_h))
-        demo_h, demo_w = demo_frame.shape[:2]
+    # Create a blank space on the right side of the camera frame
+    # The demo video will be placed in the top-right corner
 
-    # Create combined frame: demo on left, camera on right
-    combined = np.hstack((demo_frame, camera_frame))
+    # Calculate total width (camera + demo)
+    total_width = cam_w + demo_w
+
+    # Create a black canvas with the total width and camera height
+    combined = np.zeros((cam_h, total_width, 3), dtype=np.uint8)
+
+    # Place camera frame on the left (full height)
+    combined[0:cam_h, 0:cam_w] = camera_frame
+
+    # Place demo frame on the right (top-aligned, smaller)
+    combined[0:demo_h, cam_w:cam_w+demo_w] = demo_frame
+
+    # Add a border around the demo video to make it stand out
+    cv2.rectangle(combined, (cam_w, 0), (cam_w + demo_w, demo_h), (0, 255, 0), 2)
+
+    # Add label above demo video
+    cv2.putText(combined, 'DEMO', (cam_w + 10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
 
     return combined
 
@@ -315,6 +333,10 @@ def main():
                         keypoints = extract_keypoints(results)
                         npy_path = os.path.join(sequence_path, str(frame_num))
                         np.save(npy_path, keypoints)
+
+                        # Add a small delay to slow down recording (100ms = 10 fps)
+                        # This gives users more time to perform the sign properly
+                        time.sleep(0.1)  # 100 milliseconds delay
 
                         # Break gracefully
                         if cv2.waitKey(10) & 0xFF == ord('q'):

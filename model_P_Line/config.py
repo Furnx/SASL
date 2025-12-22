@@ -140,7 +140,7 @@ VOCAB_SCHEDULE = {
 
 # !!! CHANGE THIS VARIABLE TO WORK ON A SPECIFIC WEEK !!!
 # Options: 'Week_1_Greetings', 'Week_2_Manners', 'All', etc.
-ACTIVE_WEEK = 'Week_38_Health'
+ACTIVE_WEEK = 'Week_17_Fruit'
 
 def get_actions():
     """
@@ -178,7 +178,7 @@ def create_directories():
     os.makedirs(DATA_PATH, exist_ok=True)
     os.makedirs(MODEL_PATH, exist_ok=True)
     os.makedirs(LOGS_PATH, exist_ok=True)
-    print(f"✅ Directories verified: {DATA_PATH}, {MODEL_PATH}, {LOGS_PATH}")
+    print(f"[OK] Directories verified: {DATA_PATH}, {MODEL_PATH}, {LOGS_PATH}")
 
 def get_model_path():
     """
