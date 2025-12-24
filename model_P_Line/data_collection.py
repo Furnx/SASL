@@ -7,6 +7,8 @@ Updates:
   - Review and retake option after each sign
   - Backspace to retake, any other key to continue
   - Demonstration video shown alongside camera feed
+  - Skip functionality: Start from any sign number or skip individual signs
+  - Press 'S' during instruction screen to skip current sign
 """
 import cv2
 import numpy as np
@@ -152,11 +154,36 @@ def main():
     print("WETHINKCODE_ SIGN LANGUAGE COLLECTOR")
     print(f"TARGET WORDS: {ACTIONS}") # Show user what they are recording
     print("="*50)
-    
+
     user_name = input("Enter your Email (e.g., tumomogame9@gmai.com): ").strip().replace(" ", "_")
     if not user_name:
         print("Error: Name is required to prevent data overwrites!")
         return
+
+    # 2. ASK USER WHICH SIGN TO START FROM
+    print("\n" + "="*50)
+    print("SIGN LIST:")
+    for idx, action in enumerate(ACTIONS):
+        print(f"  {idx + 1}. {action}")
+    print("="*50)
+
+    start_from = input("\nEnter the sign number to start from (press Enter to start from 1): ").strip()
+
+    if start_from == "":
+        start_index = 0
+    else:
+        try:
+            start_index = int(start_from) - 1  # Convert to 0-based index
+            if start_index < 0 or start_index >= len(ACTIONS):
+                print(f"Error: Please enter a number between 1 and {len(ACTIONS)}")
+                return
+        except ValueError:
+            print("Error: Please enter a valid number")
+            return
+
+    print(f"\n✅ Starting from sign #{start_index + 1}: {ACTIONS[start_index]}")
+    if start_index > 0:
+        print(f"   (Skipping {start_index} sign(s))")
 
     # Create base directory
     if not os.path.exists(DATA_PATH):
@@ -174,9 +201,9 @@ def main():
     # Set mediapipe model
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
 
-        # Loop through actions (Pulled from config.py)
-        for action in ACTIONS:
-            print(f"\n--- PREPARING FOR ACTION: {action} ---")
+        # Loop through actions (Pulled from config.py) - starting from user's choice
+        for action_index, action in enumerate(ACTIONS[start_index:], start=start_index):
+            print(f"\n--- PREPARING FOR ACTION #{action_index + 1}: {action} ---")
 
             # Load demonstration video for this action
             demo_video_path = get_demo_video_path(action)
@@ -192,8 +219,9 @@ def main():
             else:
                 print(f"⚠️  No demonstration video found for '{action}'")
 
-            # Flag to control retake
+            # Flag to control retake and skip
             retake_sign = True
+            skip_sign = False
 
             while retake_sign:
                 # Create action folder (MP_Data/hello)
@@ -220,13 +248,15 @@ def main():
                     # Get screen dimensions for centering text
                     h, w = combined_frame.shape[:2]
 
-                    # Show instruction screen
-                    cv2.putText(combined_frame, f'SIGN: {action.upper()}', (w//2 - 200, h//2 - 100),
-                                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
-                    cv2.putText(combined_frame, f'You will record {no_sequences} videos', (w//2 - 250, h//2),
+                    # Show instruction screen with sign number
+                    cv2.putText(combined_frame, f'SIGN #{action_index + 1}/{len(ACTIONS)}: {action.upper()}', (w//2 - 300, h//2 - 150),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3, cv2.LINE_AA)
+                    cv2.putText(combined_frame, f'You will record {no_sequences} videos', (w//2 - 250, h//2 - 50),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-                    cv2.putText(combined_frame, 'Press SPACE to start recording', (w//2 - 280, h//2 + 60),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                    cv2.putText(combined_frame, 'Press SPACE to start recording', (w//2 - 280, h//2 + 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                    cv2.putText(combined_frame, 'Press S to skip this sign', (w//2 - 230, h//2 + 70),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 165, 0), 2, cv2.LINE_AA)
                     cv2.putText(combined_frame, 'Press Q to quit', (w//2 - 150, h//2 + 120),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (100, 100, 100), 2, cv2.LINE_AA)
 
@@ -243,6 +273,11 @@ def main():
                     key = cv2.waitKey(10)
                     if key == 32:  # SPACE bar
                         break
+                    if key == ord('s') or key == ord('S'):  # S key to skip
+                        print(f"⏭️  Skipping sign '{action}'...")
+                        skip_sign = True
+                        retake_sign = False
+                        break
                     if key == ord('q'):
                         cap.release()
                         if demo_cap:
@@ -250,6 +285,11 @@ def main():
                         cv2.destroyAllWindows()
                         sys.exit()
 
+                # If user chose to skip, break out of retake loop
+                if skip_sign:
+                    break
+
+                # Only record if not skipping
                 # Loop through sequences (videos)
                 for sequence in range(no_sequences):
 
