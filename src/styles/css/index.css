@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=New+Rocker&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root
+{
+  --action-colour: rgb(85, 115, 174);
+
+--bg-colour:#000;
+
+--fg-colour:#fff;
+--border-radius:10px;
+--border:#ffffffb0;
+
+}
+
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  font-family: "Jost";
+  overflow: hidden;
+}
+
+.appbar_title{
+    font-size: 20pt;
+   
+}
+
+body{
+    transition: background-color 0.5s;
+    background-color: var(--bg-colour);
+    color: var(--fg-colour);
+     margin: 0;
+   
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button{
+   
+    color: var(--fg-colour);
+}
+.accBtn{
+    border: var(--border);
+    width: 50px;
+    height: 50px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   border-radius: var(--border-radius);
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+}
+.btnTheme{
+  width:50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border:var(--border);
+  background-color: transparent;
+  border-radius: var(--border-radius);
+}
+
+
+
+.controlPanel{
+ 
+  border: var(--border);
+   border-radius: var(--border-radius);
+  background-color: var(--bg-colour);
+  position: fixed;
+ 
+  bottom: 50px;
+ margin: 0vw 30vw 0vw 30vw;
+  width: 40vw;
+}

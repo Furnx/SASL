@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Activity, Video, VideoOff, Users } from 'lucide-react';
+import ControlBar from '../components/controlsbar';
 
-export default function App() {
+export default function Home() {
   // State for UI Logic
   const [cameraActive, setCameraActive] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -44,10 +46,12 @@ export default function App() {
     // Load Voices
     const loadVoices = () => {
       const voices = synthRef.current.getVoices();
-      selectedVoiceRef.current = voices.find(voice => voice.name.includes('Google US English')) || 
+     if (selectedVoiceRef!=null)
+      {
+         selectedVoiceRef.current = voices.find(voice => voice.name.includes('Google US English')) || 
                                  voices.find(voice => voice.name.includes('Samantha')) ||
                                  voices.find(voice => voice.lang.includes('en-US')) || 
-                                 voices[0];
+                                 voices[0];}
     };
     
     if (synthRef.current.onvoiceschanged !== undefined) {
@@ -340,8 +344,9 @@ export default function App() {
 
   // --- 5. Render ---
   return (
-    <div className="bg-gray-900 h-screen w-screen overflow-hidden flex flex-col relative font-sans text-white">
-      {/* Embedded CSS for Animations */}
+     <div className=" w-screen overflow-hidden flex flex-col relative font-sans text-white">
+   
+     {/* Embedded CSS for Animations */}
       <style>{`
         @keyframes pulse-ring {
           0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
@@ -367,10 +372,8 @@ export default function App() {
       `}</style>
 
       {/* Header */}
-      <header className="w-full p-4 shrink-0 z-20 flex justify-between items-center bg-gray-900/50 backdrop-blur-sm">
-        <h1 className="text-base md:text-xl font-bold tracking-wider text-gray-100 flex items-center gap-2 break-words">
-          WeThinkCode_<span className="text-blue-500">Cohort_2025</span>_SASL
-        </h1>
+      <header className="w-full p-4 shrink-0 z-20 flex justify-between items-center backdrop-blur-sm">
+      
         <div className="flex items-center gap-2 shrink-0">
           <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${cameraActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
           <span className="text-xs md:text-sm text-gray-400 font-medium hidden md:inline">{statusText}</span>
@@ -381,7 +384,7 @@ export default function App() {
       <div className="flex-1 flex flex-col md:flex-row items-stretch justify-center w-full max-w-7xl mx-auto px-4 gap-6 min-h-0 py-4">
 
         {/* Video Section */}
-        <div className="relative w-full md:w-2/5 aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-gray-700 group shrink-1 max-h-[35vh] md:max-h-full md:h-auto">
+        <div className="relative w-full md:w-2/5 aspect-video  rounded-xl overflow-hidden shadow-2xl border border-gray-700 group shrink-1 max-h-[35vh] md:max-h-full md:h-auto">
           <video
             ref={videoRef}
             className="w-full h-full object-cover transform scale-x-[-1]"
@@ -392,7 +395,7 @@ export default function App() {
 
           {/* Placeholder when Camera Off */}
           {!cameraActive && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 text-gray-500 z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 z-10">
               <VideoOff className="w-12 h-12 md:w-20 md:h-20 mb-4 opacity-50" />
               <span className="text-sm md:text-lg font-medium">Camera Inactive</span>
             </div>
@@ -410,7 +413,7 @@ export default function App() {
 
           {/* Processing Overlay */}
           {isProcessing && !isCapturing && (
-            <div className="absolute inset-0 bg-blue-900/40 flex flex-col items-center justify-center z-20 backdrop-blur-[2px]">
+            <div className="absolute inset-0  flex flex-col items-center justify-center z-20 backdrop-blur-[2px]">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
               <span className="text-blue-100 font-mono tracking-widest text-sm text-center px-4">{processingStep}</span>
             </div>
@@ -423,18 +426,18 @@ export default function App() {
                 ? "bg-blue-600/90 text-white"
                 : "bg-green-600/90 text-white"
             }`}>
-              {currentTurn === "deaf" ? "🤟 Deaf Person's Turn" : "🎤 Hearing Person's Turn"}
+              {currentTurn === "deaf" ? " Deaf Person's Turn" : "🎤 Hearing Person's Turn"}
             </div>
           </div>
         </div>
 
         {/* Conversation Section */}
-        <div className="w-full md:w-3/5 flex flex-col bg-gray-800/50 rounded-xl border border-gray-700 shadow-2xl overflow-hidden">
+        <div className="w-full md:w-3/5 flex flex-col rounded-xl border border-gray-700 shadow-2xl overflow-hidden">
 
           {/* Conversation Header */}
-          <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
+          <div className=" px-4 py-3 border-b border-gray-700">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              💬 Conversation
+               Conversation
             </h2>
             <p className="text-xs text-gray-400 mt-1">Real-time translation between sign language and speech</p>
           </div>
@@ -519,66 +522,14 @@ export default function App() {
 
       </div>
 
-      {/* Controls */}
-      <div className="w-full bg-gray-800/80 backdrop-blur-md p-4 shrink-0 border-t border-gray-700 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-30">
-        <div className="max-w-4xl mx-auto">
-
-          {/* Instructions */}
-          <div className="text-center mb-4">
-            <p className="text-xs text-gray-400">
-              <span className="text-blue-400 font-bold">Deaf Person:</span> Just enable camera - automatic hand detection! •
-              <span className="text-green-400 font-bold ml-2">Hearing Person:</span> Click "Speak" to respond
-            </p>
-            {handsDetected && cameraActive && (
-              <p className="text-xs text-blue-300 mt-1 animate-pulse">
-                👋 Hands detected! Processing will start automatically...
-              </p>
-            )}
-          </div>
-
-          <div className="flex justify-center items-center gap-8 md:gap-12">
-
-            {/* Toggle Camera Button (Deaf Person - Auto Detection) */}
-            <button
-              onClick={toggleCamera}
-              className="flex flex-col items-center gap-1 group focus:outline-none"
-            >
-              <div className={`p-4 rounded-full text-white transition-all duration-300 shadow-2xl transform group-hover:scale-110 active:scale-95 ring-4 ring-gray-800 ${
-                cameraActive
-                  ? 'bg-blue-600 ring-blue-500 group-hover:bg-red-600 group-hover:ring-red-400'
-                  : 'bg-gray-700 ring-gray-600 group-hover:bg-blue-600 group-hover:ring-blue-400'
-              }`}>
-                {cameraActive ? (
-                  handsDetected ? <span className="text-2xl animate-pulse">🤟</span> : <Video className="w-6 h-6" />
-                ) : (
-                  <VideoOff className="w-6 h-6" />
-                )}
-              </div>
-              <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold group-hover:text-white transition-colors">
-                {cameraActive ? (handsDetected ? "Hands Detected!" : "Camera On") : "Enable Camera"}
-              </span>
-            </button>
-
-            {/* Voice Button (Hearing Person) */}
-            <button
-              onClick={toggleListening}
-              className="flex flex-col items-center gap-1 group focus:outline-none"
-            >
-              <div className={`p-4 rounded-full text-white transition-all duration-300 shadow-2xl transform group-hover:scale-110 active:scale-95 ring-4 ring-gray-800 ${
-                isListening
-                  ? 'bg-green-600 listening-pulse ring-green-500'
-                  : 'bg-green-600 group-hover:bg-green-500 group-hover:ring-green-400'
-              }`}>
-                {isListening ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
-              </div>
-              <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold group-hover:text-white transition-colors">
-                {isListening ? "Listening..." : "Speak"}
-              </span>
-            </button>
-
-          </div>
-        </div>
-      </div>
-    </div>
+   <ControlBar 
+        cameraActive={cameraActive} 
+        handsDetected={handsDetected}
+        toggleCamera={toggleCamera}
+        isListening={isListening}
+        toggleListening={toggleListening}
+        
+        />
+   </div>
   );
 }
