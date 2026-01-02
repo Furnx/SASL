@@ -28,9 +28,14 @@ from config import (
     DROPOUT_RATE,
     SEQUENCE_LENGTH,
     TOTAL_FEATURES,
+    USE_AUGMENTATION,
+    AUGMENTATION_FACTOR,
     create_directories,
     get_model_path
 )
+
+# Import augmentation
+from augmentation import create_augmented_dataset
 
 # =============================================================================
 # 1. DATA LOADING FUNCTION (The "Smart" Part)
@@ -119,40 +124,83 @@ def build_model(num_classes):
 def train():
     # 1. Setup
     create_directories()
-    
+
     # 2. Load Data
     X, y = load_and_process_data()
-    
+
     if len(X) == 0:
         print("❌ CRITICAL ERROR: No data found. Run data_collection.py first.")
         return
 
-    # 3. Split Data (Train vs Test)
+    # 3. Data Augmentation (if enabled)
+    if USE_AUGMENTATION:
+        print(f"\n{'='*60}")
+        print(f"DATA AUGMENTATION ENABLED")
+        print(f"{'='*60}")
+        print(f"Augmentation factor: {AUGMENTATION_FACTOR}")
+        print(f"This will create {AUGMENTATION_FACTOR} augmented versions of each sequence")
+        print(f"{'='*60}\n")
+
+        X, y = create_augmented_dataset(X, y, AUGMENTATION_FACTOR)
+    else:
+        print(f"\n⚠️  Data augmentation is DISABLED")
+        print(f"   To enable, set USE_AUGMENTATION = True in config.py\n")
+
+    # 4. Split Data (Train vs Test)
     # We hold back 5% of data to test if the model actually generalizes
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
 
-    # 4. Build Model
+    # 5. Build Model
     # Note: len(ACTIONS) must match the current config.py active list
-    model = build_model(len(ACTIONS)) 
+    print(f"\n{'='*60}")
+    print(f"BUILDING LSTM MODEL")
+    print(f"{'='*60}")
+    model = build_model(len(ACTIONS))
     model.summary()
+    print(f"{'='*60}\n")
 
-    # 5. Callbacks (The "Auto-Save" features)
+    # 6. Callbacks (The "Auto-Save" features)
     callbacks = [
         # Stop training if it stops getting better (saves time)
-        EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True),
+        EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True, verbose=1),
         # Save the best version of the model automatically
-        ModelCheckpoint(get_model_path(), monitor='val_loss', save_best_only=True)
+        ModelCheckpoint(get_model_path(), monitor='val_loss', save_best_only=True, verbose=1)
     ]
 
-    # 6. Train
-    print("\n🚀 Starting Training...")
-    model.fit(
-        X_train, y_train, 
-        epochs=EPOCHS, 
+    # 7. Train
+    print(f"\n{'='*60}")
+    print(f"STARTING TRAINING")
+    print(f"{'='*60}")
+    print(f"Training samples: {len(X_train)}")
+    print(f"Validation samples: {len(X_test)}")
+    print(f"Epochs: {EPOCHS}")
+    print(f"Batch size: {BATCH_SIZE}")
+    print(f"Model will be saved to: {get_model_path()}")
+    print(f"{'='*60}\n")
+
+    history = model.fit(
+        X_train, y_train,
+        epochs=EPOCHS,
         batch_size=BATCH_SIZE,
         validation_data=(X_test, y_test),
-        callbacks=callbacks
+        callbacks=callbacks,
+        verbose=1
     )
+
+    # 8. Final Evaluation
+    print(f"\n{'='*60}")
+    print(f"TRAINING COMPLETE!")
+    print(f"{'='*60}")
+
+    train_loss, train_acc = model.evaluate(X_train, y_train, verbose=0)
+    test_loss, test_acc = model.evaluate(X_test, y_test, verbose=0)
+
+    print(f"Training Accuracy:   {train_acc*100:.2f}%")
+    print(f"Validation Accuracy: {test_acc*100:.2f}%")
+    print(f"Model saved to: {get_model_path()}")
+    print(f"{'='*60}\n")
+
+    return model, history
 
     print(f"\n🎉 Success! Model saved to: {get_model_path()}")
 

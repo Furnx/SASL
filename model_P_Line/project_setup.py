@@ -13,7 +13,7 @@ This script will automatically:
 
 Just run: python project_setup.py
 
-Author: WeThinkCode_ SASL Team
+Author: WeThinkCode_Cohort_2025_SASL Team
 """
 
 import os

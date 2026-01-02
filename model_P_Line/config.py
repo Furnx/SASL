@@ -1,7 +1,7 @@
 """
 Configuration file for WeThinkCode_ SASL Sign Language Project
 Based on 'Einstein Hands' Vocabulary (300+ signs).
-Structured for the 'No-Burnout' Weekly Plan (5 signs/week) ...
+Structured for the 'No-Burnout' Weekly Plan (5+ signs/week) ...
 """
 import os
 import numpy as np
@@ -46,6 +46,89 @@ MIN_TRACKING_CONFIDENCE = 0.5
 # Right Hand: 21 landmarks × 3 (x, y, z) = 63
 # Total: 132 + 1404 + 63 + 63 = 1662
 TOTAL_FEATURES = 1662
+
+# ---------------------------------------------------
+# 4. DATA AUGMENTATION CONFIG
+# ---------------------------------------------------
+# Enable/disable augmentation
+USE_AUGMENTATION = True         # Set to False to disable augmentation
+
+# Number of augmented versions per original sequence
+# Example: If 2, each sequence creates 2 augmented versions
+# Total data = original + (original × AUGMENTATION_FACTOR)
+# If you have 30 sequences and factor=4, you get 30 + 120 = 150 sequences
+AUGMENTATION_FACTOR = 4         # Recommended: 3-5
+
+# Augmentation techniques and their parameters
+AUGMENTATION_CONFIG = {
+    # Temporal augmentation (time-based)
+    'time_warp': {
+        'enabled': True,
+        'speed_range': (0.8, 1.2),      # 80% to 120% speed
+        'probability': 0.5,              # 50% chance to apply
+    },
+
+    # Spatial augmentation (position-based)
+    'translate': {
+        'enabled': True,
+        'shift_range': (-0.1, 0.1),     # ±10% shift in x and y
+        'probability': 0.7,              # 70% chance to apply
+    },
+
+    'scale': {
+        'enabled': True,
+        'scale_range': (0.9, 1.1),      # 90% to 110% size
+        'probability': 0.5,              # 50% chance to apply
+    },
+
+    'rotate': {
+        'enabled': True,
+        'angle_range': (-10, 10),       # ±10 degrees rotation
+        'probability': 0.5,              # 50% chance to apply
+    },
+
+    # Noise augmentation
+    'gaussian_noise': {
+        'enabled': True,
+        'noise_std': 0.01,              # Standard deviation of noise
+        'probability': 0.3,              # 30% chance to apply
+    },
+
+    'keypoint_dropout': {
+        'enabled': True,
+        'dropout_rate': 0.05,           # 5% of keypoints randomly zeroed
+        'probability': 0.2,              # 20% chance to apply
+    },
+}
+
+# Landmark structure for augmentation
+# This helps the augmentation functions know how to process different landmark types
+LANDMARK_STRUCTURE = {
+    'pose': {
+        'start': 0,
+        'count': 33,
+        'features_per_landmark': 4,     # x, y, z, visibility
+        'total_features': 132,
+    },
+    'face': {
+        'start': 132,
+        'count': 468,
+        'features_per_landmark': 3,     # x, y, z
+        'total_features': 1404,
+    },
+    'left_hand': {
+        'start': 1536,                  # 132 + 1404
+        'count': 21,
+        'features_per_landmark': 3,     # x, y, z
+        'total_features': 63,
+    },
+    'right_hand': {
+        'start': 1599,                  # 132 + 1404 + 63
+        'count': 21,
+        'features_per_landmark': 3,     # x, y, z
+        'total_features': 63,
+    },
+}
 
 # ---------------------------------------------------
 # 3. WEEKLY VOCABULARY SCHEDULE (The Master Plan)
@@ -140,7 +223,7 @@ VOCAB_SCHEDULE = {
 
 # !!! CHANGE THIS VARIABLE TO WORK ON A SPECIFIC WEEK !!!
 # Options: 'Week_1_Greetings', 'Week_2_Manners', 'All', etc.
-ACTIVE_WEEK = 'Week_38_Health'
+ACTIVE_WEEK = 'Week_5_Pronouns'
 
 def get_actions():
     """
