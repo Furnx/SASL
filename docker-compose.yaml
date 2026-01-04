@@ -1,0 +1,11 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - 80:4173
+    depends_on:
+      - api
+  api:
+    build: ./api/
+    ports:
+      - 8080:8443

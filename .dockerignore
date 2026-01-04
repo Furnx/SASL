@@ -1,3 +1,7 @@
+mobile/
+appDevelopers/
+model_P_Line/
+demo.txt
 # .gitignore
 demo.txt
 # 1. DATA (Never upload the videos!)
@@ -23,8 +27,6 @@ env/
 .DS_Store
 .vscode/
 .idea/
-uv.lock
-.venv
 
 # 5. NODE/NPM FILES
 node_modules/
