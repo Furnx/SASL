@@ -243,7 +243,7 @@ def main():
     cv2.setWindowProperty('SASL Data Collection', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     # Set mediapipe model
-    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=2) as holistic:
 
         # Loop through actions (Pulled from config.py) - starting from user's choice
         for action_index, action in enumerate(ACTIONS[start_index:], start=start_index):
