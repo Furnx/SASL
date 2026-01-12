@@ -9,6 +9,7 @@ Updates:
   - Demonstration video shown alongside camera feed
   - Skip functionality: Start from any sign number or skip individual signs
   - Press 'S' during instruction screen to skip current sign
+  - Zipping of collected data for easier upload when all signs for the week are complete
 """
 import cv2
 import numpy as np
@@ -16,12 +17,13 @@ import os
 import sys
 import time
 import shutil
+import zipfile
 
 # --------------------------------------------------------------------------
 # IMPORT CONFIGURATION (Connects to config.py)
 # --------------------------------------------------------------------------
 # We import variables directly so you don't have to edit this file ever again.
-from config import ACTIONS, DATA_PATH, no_sequences, sequence_length, get_demo_video_path
+from config import ACTIONS, DATA_PATH, no_sequences, sequence_length, VOCAB_SCHEDULE, ACTIVE_WEEK, get_demo_video_path
 
 # --------------------------------------------------------------------------
 # MEDIAPIPE SETUP
@@ -144,6 +146,48 @@ def combine_frames(camera_frame, demo_frame):
                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
 
     return combined
+
+def is_week_complete(mp_data_path, vocab, active_week):
+    """
+    Check if all signs for the active week have been collected.
+
+    Args:
+        mp_data_path: Path to the MP_Data directory
+        vocab: List of signs for the active week"""
+    if not os.path.exists(mp_data_path):
+        return False
+    recorded = [d for d in os.listdir(mp_data_path) if os.path.isdir(os.path.join(mp_data_path, d))]
+
+    return True if len(recorded) >= len(vocab[active_week]) else False
+    
+    
+def zip_mp_data(source_dir, active_week, email):
+    """
+    Zip the MP_Data directory for easier upload.
+    Folder zipped only when all signs for the active week are collected.
+    
+    args:
+        source_dir: Path to the MP_Data directory
+        output_file: Path for the output zip file
+    """
+
+    base_dir = os.path.dirname(source_dir)
+
+    contributor_folder = os.path.join(base_dir, email)
+    os.makedirs(contributor_folder, exist_ok=True)
+
+    # puts the zipped folder inside the contributor folder
+    output_path = os.path.join(contributor_folder, f"{active_week}.zip")
+
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirc, files in os.walk(source_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, source_dir)
+                zipf.write(file_path, arcname)
+    print(f"Data zipped successfully in {output_path}!")
+    return output_path
+
 
 # --------------------------------------------------------------------------
 # MAIN LOGIC
@@ -442,7 +486,16 @@ def main():
     cap.release()
     cv2.destroyAllWindows()
     print("\nSUCCESS! All data collected.")
-    print(f"Please upload the folder '{DATA_PATH}' to Google Drive.")
+
+    # Check if all signs for the active week are collected
+    mp_data_path = DATA_PATH
+
+    # If complete, zip the folder for easier upload
+    if is_week_complete(mp_data_path, VOCAB_SCHEDULE, ACTIVE_WEEK):
+        print(f"\n🎉 All signs for Week {ACTIVE_WEEK} have been collected!")
+        zip_file_path = os.path.join(os.path.dirname(DATA_PATH), f"{ACTIVE_WEEK}.zip")
+        zip_mp_data(mp_data_path, ACTIVE_WEEK, user_name)
+        print(f"Please upload the zip file '{zip_file_path}' to Google Drive.")
 
 if __name__ == '__main__':
     main()
