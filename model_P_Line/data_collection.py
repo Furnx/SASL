@@ -18,12 +18,14 @@ import sys
 import time
 import shutil
 import zipfile
+from googleapiclient.errors import HttpError
 
 # --------------------------------------------------------------------------
 # IMPORT CONFIGURATION (Connects to config.py)
 # --------------------------------------------------------------------------
 # We import variables directly so you don't have to edit this file ever again.
 from config import ACTIONS, DATA_PATH, no_sequences, sequence_length, VOCAB_SCHEDULE, ACTIVE_WEEK, get_demo_video_path
+from upload_data import get_drive_service, create_or_get_contributor_folder, upload_zip_folder, zip_mp_data
 
 # --------------------------------------------------------------------------
 # MEDIAPIPE SETUP
@@ -161,33 +163,6 @@ def is_week_complete(mp_data_path, vocab, active_week):
     return True if len(recorded) >= len(vocab[active_week]) else False
     
     
-def zip_mp_data(source_dir, active_week, email):
-    """
-    Zip the MP_Data directory for easier upload.
-    Folder zipped only when all signs for the active week are collected.
-    
-    args:
-        source_dir: Path to the MP_Data directory
-        output_file: Path for the output zip file
-    """
-
-    base_dir = os.path.dirname(source_dir)
-
-    contributor_folder = os.path.join(base_dir, email)
-    os.makedirs(contributor_folder, exist_ok=True)
-
-    # puts the zipped folder inside the contributor folder
-    output_path = os.path.join(contributor_folder, f"{active_week}.zip")
-
-    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirc, files in os.walk(source_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, source_dir)
-                zipf.write(file_path, arcname)
-    print(f"Data zipped successfully in {output_path}!")
-    return output_path
-
 
 # --------------------------------------------------------------------------
 # MAIN LOGIC
@@ -493,9 +468,34 @@ def main():
     # If complete, zip the folder for easier upload
     if is_week_complete(mp_data_path, VOCAB_SCHEDULE, ACTIVE_WEEK):
         print(f"\n🎉 All signs for Week {ACTIVE_WEEK} have been collected!")
-        zip_file_path = os.path.join(os.path.dirname(DATA_PATH), f"{ACTIVE_WEEK}.zip")
-        zip_mp_data(mp_data_path, ACTIVE_WEEK, user_name)
-        print(f"Please upload the zip file '{zip_file_path}' to Google Drive.")
+        try :
+            # build google drive service
+            service =get_drive_service()
+            # !!!! PLEASE MOVE ID TO DOTENV AFTER CRATING KEY!!!!
+            parent_folder_id = '1xOUyOz1fiRocPXLqkjHCBaXtEreVTGt3' 
+
+            # create or use existing contributor folder
+            contributor_folder_id = create_or_get_contributor_folder(service, parent_folder_id, user_name)
+
+            # zip the mp_data folder
+            zip_file_path = os.path.join(os.path.dirname(mp_data_path), f"{ACTIVE_WEEK}.zip")
+            zip_mp_data(mp_data_path, zip_file_path)
+
+            # upload the zip file to google drive
+            upload_zip_folder(service, zip_file_path, contributor_folder_id)
+
+            print(f"Please upload the zip file '{zip_file_path}' to Google Drive.")
+        except FileNotFoundError as e:
+            print(f"Missing file: {e}")
+        except RuntimeError as e:
+            print(f"Authentication error: {e}")
+        except HttpError as e:
+            print(f"Google drive Api error. Please upload week.zip manually!")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+    else:
+        print(f"\n⚠️  Not all signs for Week {ACTIVE_WEEK} have been collected yet.")
+        print("   Please complete all signs before uploading.")
 
 if __name__ == '__main__':
     main()
