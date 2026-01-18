@@ -8,6 +8,7 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 import json
 from google.oauth2.credentials import Credentials
+from config import ACTIVE_WEEK
 
 # ----------------------------------------------------------------
 # CONFIGURATION
@@ -164,6 +165,11 @@ def main():
         service = get_drive_service()
         print("Authentication successful!")
         
+        # Create or get the week folder
+        print(f"Creating/getting folder for {ACTIVE_WEEK}...")
+        week_folder_id = create_or_get_contributor_folder(service, PROJECT_ROOT_ID, ACTIVE_WEEK)
+        print(f"Using folder: {ACTIVE_WEEK} (ID: {week_folder_id})")
+        
         # Define paths
         mp_data_dir = 'MP_Data'
         zip_output = 'MP_Data.zip'
@@ -176,12 +182,13 @@ def main():
         print(f"Zipping {mp_data_dir}...")
         zip_file_path = zip_mp_data(mp_data_dir, zip_output)
         
-        # Upload to Google Drive
-        print(f"Uploading {zip_file_path} to Google Drive...")
-        file_id = upload_zip_folder(service, zip_file_path, PROJECT_ROOT_ID)
+        # Upload to Google Drive in the week folder
+        print(f"Uploading {zip_file_path} to {ACTIVE_WEEK} folder on Google Drive...")
+        file_id = upload_zip_folder(service, zip_file_path, week_folder_id)
         
         if file_id:
             print(f"\nSuccess! File uploaded with ID: {file_id}")
+            print(f"Location: {ACTIVE_WEEK} folder in Google Drive")
         else:
             print("\nUpload failed. Please check the error messages above.")
     
