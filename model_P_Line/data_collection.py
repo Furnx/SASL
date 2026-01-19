@@ -174,7 +174,7 @@ def main():
     print(f"TARGET WORDS: {ACTIONS}") # Show user what they are recording
     print("="*50)
 
-    user_name = input("Enter your Email (e.g., tumomogame9@gmai.com): ").strip().replace(" ", "_")
+    user_name = input("Enter your Email (e.g., tumomogame9@gmail.com): ").strip().replace(" ", "_")
     if not user_name:
         print("Error: Name is required to prevent data overwrites!")
         return
@@ -466,36 +466,34 @@ def main():
     mp_data_path = DATA_PATH
 
     # If complete, zip the folder for easier upload
-    if is_week_complete(mp_data_path, VOCAB_SCHEDULE, ACTIVE_WEEK):
-        print(f"\n🎉 All signs for Week {ACTIVE_WEEK} have been collected!")
-        try :
-            # build google drive service
-            service =get_drive_service()
-            # !!!! PLEASE MOVE ID TO DOTENV AFTER CRATING KEY!!!!
+    if is_week_complete(DATA_PATH, VOCAB_SCHEDULE, ACTIVE_WEEK):
+        try:
+            print("Authenticating with Google Drive...")
+            service = get_drive_service()  
+            
+            # The ID of the main folder where everyone's work goes
             parent_folder_id = '1xOUyOz1fiRocPXLqkjHCBaXtEreVTGt3' 
 
-            # create or use existing contributor folder
+            # logic change: We use 'user_name' from the top of THIS script
+            print(f"Creating/getting folder for {user_name}...")
             contributor_folder_id = create_or_get_contributor_folder(service, parent_folder_id, user_name)
 
-            # zip the mp_data folder
-            zip_file_path = os.path.join(os.path.dirname(mp_data_path), f"{ACTIVE_WEEK}.zip")
-            zip_mp_data(mp_data_path, zip_file_path)
-
-            # upload the zip file to google drive
-            upload_zip_folder(service, zip_file_path, contributor_folder_id)
-
-            print(f"Please upload the zip file '{zip_file_path}' to Google Drive.")
-        except FileNotFoundError as e:
-            print(f"Missing file: {e}")
-        except RuntimeError as e:
-            print(f"Authentication error: {e}")
-        except HttpError as e:
-            print(f"Google drive Api error. Please upload week.zip manually!")
+            # Zip the data (DATA_PATH is defined in config.py)
+            zip_output = f"{ACTIVE_WEEK}_{user_name}.zip"
+            print(f"Zipping data to {zip_output}...")
+            zip_file_path = zip_mp_data(DATA_PATH, zip_output) 
+            
+            # Upload (using the IDs we just generated)
+            print(f"Uploading to Google Drive...")
+            file_id = upload_zip_folder(service, zip_file_path, contributor_folder_id) 
+            
+            if file_id:
+                print(f"\n✅ Success! Uploaded with ID: {file_id}")
+            
         except Exception as e:
-            print(f"An unexpected error occurred: {e}")
+            print(f"❌ Automation Error: {e}")
     else:
-        print(f"\n⚠️  Not all signs for Week {ACTIVE_WEEK} have been collected yet.")
-        print("   Please complete all signs before uploading.")
+        print(f"\n⚠️ Week {ACTIVE_WEEK} incomplete. Finish all signs to trigger upload.")
 
 if __name__ == '__main__':
     main()
