@@ -423,7 +423,7 @@ def main():
 
                     h, w = combined_frame.shape[:2]
 
-                    # Review screen
+                    # Review screen 
                     cv2.putText(combined_frame, f'COMPLETED: {action.upper()}', (w//2 - 250, h//2 - 120),
                                 cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
                     cv2.putText(combined_frame, f'Recorded {no_sequences} videos', (w//2 - 200, h//2 - 40),
@@ -484,7 +484,7 @@ def main():
             zip_file_path = zip_mp_data(DATA_PATH, zip_output) 
             
             # Upload (using the IDs we just generated)
-            print(f"Uploading to Google Drive...")
+            print(f"Uploading to Google Drive....")
             file_id = upload_zip_folder(service, zip_file_path, contributor_folder_id) 
             
             if file_id:
