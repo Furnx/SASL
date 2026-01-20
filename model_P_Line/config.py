@@ -14,6 +14,11 @@ MODEL_PATH = os.path.join('model')   # Folder for saved models (aligned with tra
 LOGS_PATH = os.path.join('logs')     # Folder for logs (aligned with train.py)
 DEMO_VIDEOS_PATH = os.path.join('Demonstration_videos')  # Folder for demonstration videos
 
+# Google Drive Configuration
+GOOGLE_CREDENTIALS_FILE = 'client_secret_979724229670-4pi9if1lqghdih0iluq95fjeoc4dqpq2.apps.googleusercontent.com.json'
+PROJECT_ROOT_ID = '1xOUyOz1fiRocPXLqkjHCBaXtEreVTGt3'  # Main Google Drive folder ID
+GOOGLE_DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
+
 # ---------------------------------------------------
 # 2. DATA COLLECTION CONFIG
 # ---------------------------------------------------
@@ -223,7 +228,7 @@ VOCAB_SCHEDULE = {
 
 # !!! CHANGE THIS VARIABLE TO WORK ON A SPECIFIC WEEK !!!
 # Options: 'Week_1_Greetings', 'Week_2_Manners', 'All', etc.
-ACTIVE_WEEK = 'Week_2_Manners'  # Set to 'All' to train on entire vocab
+ACTIVE_WEEK = 'Week_40_Final_Mix'  # Set to 'All' to train on entire vocab
 
 def get_actions():
     """
