@@ -24,8 +24,8 @@ from googleapiclient.errors import HttpError
 # IMPORT CONFIGURATION (Connects to config.py)
 # --------------------------------------------------------------------------
 # We import variables directly so you don't have to edit this file ever again.
-from config import ACTIONS, DATA_PATH, no_sequences, sequence_length, VOCAB_SCHEDULE, ACTIVE_WEEK, get_demo_video_path
-from upload_data import get_drive_service, create_or_get_contributor_folder, upload_zip_folder, zip_mp_data
+from config import ACTIONS, DATA_PATH, no_sequences, sequence_length, VOCAB_SCHEDULE, ACTIVE_WEEK, get_demo_video_path, PROJECT_ROOT_ID
+from upload_data import get_drive_service, create_or_get_contributor_folder, upload_zip_folder, zip_mp_data, verify_upload
 
 # --------------------------------------------------------------------------
 # MEDIAPIPE SETUP
@@ -151,16 +151,101 @@ def combine_frames(camera_frame, demo_frame):
 
 def is_week_complete(mp_data_path, vocab, active_week):
     """
-    Check if all signs for the active week have been collected.
+    Check if all signs for the active week have been COMPLETELY collected.
+    
+    Validates that:
+    1. All signs for the week have folders
+    2. Each sign has exactly 30 sequence folders (0-29)
+    3. Each sequence folder has exactly 30 .npy files (frames 0-29)
 
     Args:
         mp_data_path: Path to the MP_Data directory
-        vocab: List of signs for the active week"""
+        vocab: Dictionary of weekly vocabulary schedules
+        active_week: Current active week (e.g., 'Week_2_Manners')
+        
+    Returns:
+        bool: True only if ALL signs are 100% complete with 30 videos × 30 frames
+    """
     if not os.path.exists(mp_data_path):
+        print(f"⚠️  MP_Data path does not exist: {mp_data_path}")
         return False
-    recorded = [d for d in os.listdir(mp_data_path) if os.path.isdir(os.path.join(mp_data_path, d))]
-
-    return True if len(recorded) >= len(vocab[active_week]) else False
+    
+    # Get the list of signs for this week
+    week_signs = vocab[active_week]
+    
+    print(f"\n{'='*60}")
+    print(f"VALIDATING DATA COMPLETENESS FOR {active_week}")
+    print(f"Expected: {len(week_signs)} signs × 30 videos × 30 frames")
+    print(f"{'='*60}")
+    
+    incomplete_signs = []
+    
+    for sign in week_signs:
+        sign_path = os.path.join(mp_data_path, sign)
+        
+        # Check if sign folder exists
+        if not os.path.exists(sign_path):
+            print(f"❌ '{sign}': Folder missing")
+            incomplete_signs.append(sign)
+            continue
+        
+        # Check if sign has all 30 sequence folders
+        missing_sequences = []
+        incomplete_sequences = []
+        
+        # Get all subdirectories in the sign folder
+        if os.path.isdir(sign_path):
+            all_folders = [f for f in os.listdir(sign_path) if os.path.isdir(os.path.join(sign_path, f))]
+        else:
+            all_folders = []
+        
+        # Count actual sequences found (folders ending with _0, _1, _2, etc.)
+        sequence_folders = {}
+        for folder in all_folders:
+            # Extract sequence number from folder name (e.g., "UserName_5" -> 5)
+            if '_' in folder:
+                try:
+                    seq_num = int(folder.split('_')[-1])
+                    sequence_folders[seq_num] = folder
+                except ValueError:
+                    continue
+        
+        for seq_num in range(no_sequences):  # 0 to 29
+            if seq_num not in sequence_folders:
+                missing_sequences.append(seq_num)
+                continue
+            
+            # Check if sequence has all 30 frames (.npy files)
+            folder_name = sequence_folders[seq_num]
+            seq_path = os.path.join(sign_path, folder_name)
+            npy_files = [f for f in os.listdir(seq_path) if f.endswith('.npy')]
+            
+            if len(npy_files) != sequence_length:  # Should be 30
+                incomplete_sequences.append(f"seq_{seq_num} ({len(npy_files)}/{sequence_length} frames)")
+        
+        # Report status for this sign
+        if missing_sequences or incomplete_sequences:
+            status = f"❌ '{sign}': "
+            if missing_sequences:
+                status += f"{len(missing_sequences)} missing videos, "
+            if incomplete_sequences:
+                status += f"{len(incomplete_sequences)} incomplete videos"
+            print(status)
+            incomplete_signs.append(sign)
+        else:
+            print(f"✅ '{sign}': Complete (30 videos × 30 frames)")
+    
+    print(f"{'='*60}")
+    
+    if incomplete_signs:
+        print(f"❌ INCOMPLETE: {len(incomplete_signs)}/{len(week_signs)} signs need work")
+        print(f"Incomplete signs: {', '.join(incomplete_signs)}")
+        print(f"{'='*60}")
+        return False
+    else:
+        print(f"✅ COMPLETE: All {len(week_signs)} signs ready for upload!")
+        print(f"{'='*60}")
+        return True
     
     
 
@@ -471,17 +556,16 @@ def main():
             print("Authenticating with Google Drive...")
             service = get_drive_service()  
             
-            # The ID of the main folder where everyone's work goes
-            parent_folder_id = '1xOUyOz1fiRocPXLqkjHCBaXtEreVTGt3' 
-
-            # logic change: We use 'user_name' from the top of THIS script
+            # Use PROJECT_ROOT_ID from config.py
             print(f"Creating/getting folder for {user_name}...")
-            contributor_folder_id = create_or_get_contributor_folder(service, parent_folder_id, user_name)
+            contributor_folder_id = create_or_get_contributor_folder(service, PROJECT_ROOT_ID, user_name)
 
             # Zip the data (DATA_PATH is defined in config.py)
+            # Use user_name as the folder name inside the zip
             zip_output = f"{ACTIVE_WEEK}_{user_name}.zip"
             print(f"Zipping data to {zip_output}...")
-            zip_file_path = zip_mp_data(DATA_PATH, zip_output) 
+            print(f"Organizing data under folder: {user_name}")
+            zip_file_path = zip_mp_data(DATA_PATH, zip_output, folder_name=user_name) 
             
             # Upload (using the IDs we just generated)
             print(f"Uploading to Google Drive...")
@@ -489,9 +573,27 @@ def main():
             
             if file_id:
                 print(f"\n✅ Success! Uploaded with ID: {file_id}")
+                
+                # Verify the upload
+                print("Verifying upload...")
+                if verify_upload(service, file_id, zip_file_path):
+                    print("✅ Upload verified successfully!")
+                    
+                    # Cleanup: Delete the temporary zip file
+                    try:
+                        os.remove(zip_file_path)
+                        print(f"✅ Cleaned up temporary file: {zip_file_path}")
+                    except Exception as cleanup_error:
+                        print(f"⚠️  Could not delete temporary file {zip_file_path}: {cleanup_error}")
+                else:
+                    print(f"⚠️  Upload verification failed - manual check recommended")
+                    print(f"Temporary file kept for manual inspection: {zip_file_path}")
+            else:
+                print(f"❌ Upload failed. Temporary file kept: {zip_file_path}")
             
         except Exception as e:
             print(f"❌ Automation Error: {e}")
+            print(f"Temporary zip file may have been created: {ACTIVE_WEEK}_{user_name}.zip")
     else:
         print(f"\n⚠️ Week {ACTIVE_WEEK} incomplete. Finish all signs to trigger upload.")
 
