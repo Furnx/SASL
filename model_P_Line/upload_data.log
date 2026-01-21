@@ -54,3 +54,21 @@
 2026-01-20 10:01:06,014 - upload_data - INFO - Verifying upload: TEST_Week_40_Final_Mix_test_user@example.com.zip
 2026-01-20 10:01:06,014 - upload_data - INFO - Local size: 44606318 bytes
 2026-01-20 10:01:06,014 - upload_data - INFO - Remote size: 44606318 bytes
+2026-01-21 09:24:44,042 - google_auth_oauthlib.flow - INFO - "GET /?state=tKay41dhJfogmjSyaWpgOhXAVhosiO&code=4%2F0ASc3gC3SlVI84Ix0KABeDzlvnAJudgs-C2gpZZgSEgTHwIre_B5NaM22bwwo-0Qv-kbr1g&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive HTTP/1.1" 200 65
+2026-01-21 09:24:45,959 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-01-21 09:24:52,713 - upload_data - INFO - Data zipped successfully!
+2026-01-21 09:24:55,719 - upload_data - INFO - Uploaded Week_40_Final_Mix_test2@gmail.com.zip to Google Drive.
+2026-01-21 09:24:55,720 - upload_data - INFO - Check if folder uploaded successfully!
+2026-01-21 09:24:56,090 - upload_data - INFO - Verifying upload: Week_40_Final_Mix_test2@gmail.com.zip
+2026-01-21 09:24:56,090 - upload_data - INFO - Local size: 2031795 bytes
+2026-01-21 09:24:56,091 - upload_data - INFO - Remote size: 2031795 bytes
+2026-01-21 09:24:56,091 - upload_data - INFO - ✓ File size verification passed!
+2026-01-21 09:39:06,756 - google_auth_oauthlib.flow - INFO - "GET /?state=y6o2em5eU9YfyOI36iqomjshIRwACp&code=4%2F0ASc3gC10ujumtKGaQnrMOZME15NCaliMeul_cTaYyCT9FsM09rJxP1WikfZRWehHofVbew&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive HTTP/1.1" 200 65
+2026-01-21 09:39:08,021 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-01-21 09:39:12,282 - upload_data - INFO - Data zipped successfully!
+2026-01-21 09:39:14,909 - upload_data - INFO - Uploaded Week_40_Final_Mix_test2@gmail.com.zip to Google Drive.
+2026-01-21 09:39:14,910 - upload_data - INFO - Check if folder uploaded successfully!
+2026-01-21 09:39:15,330 - upload_data - INFO - Verifying upload: Week_40_Final_Mix_test2@gmail.com.zip
+2026-01-21 09:39:15,330 - upload_data - INFO - Local size: 2634722 bytes
+2026-01-21 09:39:15,331 - upload_data - INFO - Remote size: 2634722 bytes
+2026-01-21 09:39:15,331 - upload_data - INFO - ✓ File size verification passed!

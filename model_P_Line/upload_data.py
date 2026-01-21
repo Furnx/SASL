@@ -424,7 +424,7 @@ def main() -> None:
     
     # Prepare the data to upload
     mp_data_path = 'MP_Data'  # Source directory
-    zip_filename = f'{ACTIVE_WEEK}_{contributor_email.split("@")[0]}_MP_Data.zip'
+    zip_filename = f'{ACTIVE_WEEK}_MP_Data.zip'
     
     if not os.path.exists(mp_data_path):
         logger.error(f"MP_Data directory not found: {mp_data_path}")
