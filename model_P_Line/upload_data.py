@@ -199,6 +199,7 @@ def create_or_get_contributor_folder(service, parent_folder_id: str, contributor
     Example:
         folder_id = create_or_get_contributor_folder(service, 'parent_id', 'user@email.com')
     '''
+    contributor_email = contributor_email.split('_')[0]
     query = (
         f'mimeType="application/vnd.google-apps.folder" '
         f'and "{parent_folder_id}" in parents '
@@ -381,6 +382,7 @@ def main() -> None:
     logger.info(f"Active Week: {ACTIVE_WEEK}")
     logger.info("=" * 60)
     
+    
     # Get Google Drive service
     try:
         service = get_drive_service()
@@ -424,7 +426,7 @@ def main() -> None:
     
     # Prepare the data to upload
     mp_data_path = 'MP_Data'  # Source directory
-    zip_filename = f'{ACTIVE_WEEK}_MP_Data.zip'
+    zip_filename = f'{ACTIVE_WEEK}.zip'
     
     if not os.path.exists(mp_data_path):
         logger.error(f"MP_Data directory not found: {mp_data_path}")
