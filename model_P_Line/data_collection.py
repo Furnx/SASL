@@ -478,9 +478,8 @@ def main():
                         npy_path = os.path.join(sequence_path, str(frame_num))
                         np.save(npy_path, keypoints)
 
-                        # Add a small delay to slow down recording (100ms = 10 fps)
-                        # This gives users more time to perform the sign properly
-                        time.sleep(0.1)  # 100 milliseconds delay
+                        # Delay between frames: 67ms = captures 30 frames in 2 seconds
+                        time.sleep(0.067)
 
                         # Break gracefully
                         if cv2.waitKey(10) & 0xFF == ord('q'):
@@ -508,7 +507,7 @@ def main():
 
                     h, w = combined_frame.shape[:2]
 
-                    # Review screen 
+                    # Review screen
                     cv2.putText(combined_frame, f'COMPLETED: {action.upper()}', (w//2 - 250, h//2 - 120),
                                 cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
                     cv2.putText(combined_frame, f'Recorded {no_sequences} videos', (w//2 - 200, h//2 - 40),
@@ -553,7 +552,6 @@ def main():
     # If complete, zip the folder for easier upload
     if is_week_complete(DATA_PATH, VOCAB_SCHEDULE, ACTIVE_WEEK):
         try:
-            user_name= user_name.split('_')[0]  # Use only the name part before any underscores for folder naming
             print("Authenticating with Google Drive...")
             service = get_drive_service()  
             
@@ -562,14 +560,14 @@ def main():
             contributor_folder_id = create_or_get_contributor_folder(service, PROJECT_ROOT_ID, user_name)
 
             # Zip the data (DATA_PATH is defined in config.py)
-            # Use user_name as the folder name inside the zip
-            zip_output = f"{ACTIVE_WEEK}.zip"
+            # Use user_name (email) as the zip file name
+            zip_output = f"{user_name}.zip"
             print(f"Zipping data to {zip_output}...")
             print(f"Organizing data under folder: {user_name}")
             zip_file_path = zip_mp_data(DATA_PATH, zip_output, folder_name=user_name) 
             
             # Upload (using the IDs we just generated)
-            print(f"Uploading to Google Drive....")
+            print(f"Uploading to Google Drive...")
             file_id = upload_zip_folder(service, zip_file_path, contributor_folder_id) 
             
             if file_id:
@@ -594,7 +592,7 @@ def main():
             
         except Exception as e:
             print(f"❌ Automation Error: {e}")
-            print(f"Temporary zip file may have been created: {ACTIVE_WEEK}_{user_name}.zip")
+            print(f"Temporary zip file may have been created: {user_name}.zip")
     else:
         print(f"\n⚠️ Week {ACTIVE_WEEK} incomplete. Finish all signs to trigger upload.")
 
