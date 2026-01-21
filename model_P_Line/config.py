@@ -228,7 +228,7 @@ VOCAB_SCHEDULE = {
 
 # !!! CHANGE THIS VARIABLE TO WORK ON A SPECIFIC WEEK !!!
 # Options: 'Week_1_Greetings', 'Week_2_Manners', 'All', etc.
-ACTIVE_WEEK = 'Week_4_Grammar'
+ACTIVE_WEEK = 'Week_3_Questions'  # Set to 'All' to train on entire vocab
 
 def get_actions():
     """
