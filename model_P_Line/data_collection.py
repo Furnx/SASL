@@ -553,6 +553,7 @@ def main():
     # If complete, zip the folder for easier upload
     if is_week_complete(DATA_PATH, VOCAB_SCHEDULE, ACTIVE_WEEK):
         try:
+            user_name= user_name.split('_')[0]  # Use only the name part before any underscores for folder naming
             print("Authenticating with Google Drive...")
             service = get_drive_service()  
             
@@ -562,7 +563,7 @@ def main():
 
             # Zip the data (DATA_PATH is defined in config.py)
             # Use user_name as the folder name inside the zip
-            zip_output = f"{ACTIVE_WEEK}_{user_name}.zip"
+            zip_output = f"{ACTIVE_WEEK}.zip"
             print(f"Zipping data to {zip_output}...")
             print(f"Organizing data under folder: {user_name}")
             zip_file_path = zip_mp_data(DATA_PATH, zip_output, folder_name=user_name) 

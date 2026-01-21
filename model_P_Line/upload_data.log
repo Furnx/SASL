@@ -72,3 +72,12 @@
 2026-01-21 09:39:15,330 - upload_data - INFO - Local size: 2634722 bytes
 2026-01-21 09:39:15,331 - upload_data - INFO - Remote size: 2634722 bytes
 2026-01-21 09:39:15,331 - upload_data - INFO - ✓ File size verification passed!
+2026-01-21 16:45:32,291 - google_auth_oauthlib.flow - INFO - "GET /?state=EB9YKI4ejqWyPKwmU0zRHHhV9i9AVU&code=4%2F0ASc3gC0-DdnpFRslVY5utarB9EH7VVZT0oxcAe_pW3TQvNE7QjdBKNCSLUn8p7yaNN5SKQ&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive HTTP/1.1" 200 65
+2026-01-21 16:45:37,902 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-01-21 16:45:52,117 - upload_data - INFO - Data zipped successfully!
+2026-01-21 16:46:01,519 - upload_data - INFO - Uploaded Week_4_Grammar_test2@gmail.com_1.zip to Google Drive.
+2026-01-21 16:46:01,546 - upload_data - INFO - Check if folder uploaded successfully!
+2026-01-21 16:46:01,941 - upload_data - INFO - Verifying upload: Week_4_Grammar_test2@gmail.com_1.zip
+2026-01-21 16:46:01,941 - upload_data - INFO - Local size: 8363347 bytes
+2026-01-21 16:46:01,943 - upload_data - INFO - Remote size: 8363347 bytes
+2026-01-21 16:46:01,944 - upload_data - INFO - ✓ File size verification passed!

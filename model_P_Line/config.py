@@ -155,7 +155,7 @@ VOCAB_SCHEDULE = {
     "Week_1_Greetings":  ['hello', 'goodbye', 'yes', 'no', 'welcome', 'awake', 'alive', 'start'],
     "Week_2_Manners":    ['please', 'thank_you', 'sorry', 'excuse_me', 'respect', 'join', 'help', 'accept'],
     "Week_3_Questions":  ['who', 'what', 'where', 'when', 'why', 'how', 'ask', 'question', 'answer'],
-    "Week_4_Grammar":    ['because', 'but', 'and', 'if', 'or', 'about', 'maybe', 'idea', 'example'],
+    "Week_4_Grammar":    ['because'],
     "Week_5_Pronouns":   ['i', 'you', 'me', 'mine', 'we', 'us', 'they', 'your', 'my', 'him', 'her'],
 
     # =========================================
@@ -228,7 +228,7 @@ VOCAB_SCHEDULE = {
 
 # !!! CHANGE THIS VARIABLE TO WORK ON A SPECIFIC WEEK !!!
 # Options: 'Week_1_Greetings', 'Week_2_Manners', 'All', etc.
-ACTIVE_WEEK = 'Week_40_Final_Mix'  # Set to 'All' to train on entire vocab
+ACTIVE_WEEK = 'Week_4_Grammar'
 
 def get_actions():
     """
