@@ -302,11 +302,14 @@ def main():
     cv2.namedWindow('SASL Data Collection', cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty('SASL Data Collection', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
+    should_quit = False
+
     # Set mediapipe model
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=2) as holistic:
 
         # Loop through actions (Pulled from config.py) - starting from user's choice
         for action_index, action in enumerate(ACTIONS[start_index:], start=start_index):
+            if should_quit: break
             print(f"\n--- PREPARING FOR ACTION #{action_index + 1}: {action} ---")
 
             # Load demonstration video for this action
@@ -328,6 +331,7 @@ def main():
             skip_sign = False
 
             while retake_sign:
+                if should_quit: break
                 # Create action folder (MP_Data/hello)
                 action_path = os.path.join(DATA_PATH, action)
                 if not os.path.exists(action_path):
@@ -383,11 +387,13 @@ def main():
                         retake_sign = False
                         break
                     if key == ord('q'):
-                        cap.release()
-                        if demo_cap:
-                            demo_cap.release()
-                        cv2.destroyAllWindows()
-                        sys.exit()
+                        print("\n⚠️  Stopping collection early...")
+                        should_quit = True
+                        break
+
+                    if should_quit:
+                        break
+
 
                 # If user chose to skip, break out of retake loop
                 if skip_sign:
@@ -396,6 +402,7 @@ def main():
                 # Only record if not skipping
                 # Loop through sequences (videos)
                 for sequence in range(no_sequences):
+                    if should_quit: break
 
                     # 2. CREATE UNIQUE FOLDER NAME: User_Sequence (e.g., Thabo_0)
                     folder_name = f"{user_name}_{sequence}"
@@ -440,11 +447,8 @@ def main():
 
                                 # Check for quit during countdown (short wait to keep video smooth)
                                 if cv2.waitKey(10) & 0xFF == ord('q'):
-                                    cap.release()
-                                    if demo_cap:
-                                        demo_cap.release()
-                                    cv2.destroyAllWindows()
-                                    sys.exit()
+                                    should_quit = True
+                                    break
 
                     # Loop through video length (sequence_length)
                     for frame_num in range(sequence_length):
@@ -483,11 +487,8 @@ def main():
 
                         # Break gracefully
                         if cv2.waitKey(10) & 0xFF == ord('q'):
-                            cap.release()
-                            if demo_cap:
-                                demo_cap.release()
-                            cv2.destroyAllWindows()
-                            sys.exit()
+                            should_quit = True
+                            break
 
                 # After all sequences for this sign, ask if happy
                 print(f"\n✅ Completed all {no_sequences} videos for '{action}'")
