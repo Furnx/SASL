@@ -210,11 +210,17 @@ def is_week_complete(mp_data_path, vocab, active_week):
                 except ValueError:
                     continue
         
+        if len(sequence_folders) != no_sequences:  # Should be 30
+            print(f"❌ '{sign}': Expected {no_sequences} videos, found {len(sequence_folders)}")
+            incomplete_signs.append(sign)
+            continue
+        
         for seq_num in range(no_sequences):  # 0 to 29
             if seq_num not in sequence_folders:
                 missing_sequences.append(seq_num)
                 continue
             
+
             # Check if sequence has all 30 frames (.npy files)
             folder_name = sequence_folders[seq_num]
             seq_path = os.path.join(sign_path, folder_name)
