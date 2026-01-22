@@ -555,9 +555,9 @@ def main():
             print("Authenticating with Google Drive...")
             service = get_drive_service()  
             
-            # Use PROJECT_ROOT_ID from config.py
-            print(f"Creating/getting folder for {user_name}...")
-            contributor_folder_id = create_or_get_contributor_folder(service, PROJECT_ROOT_ID, user_name)
+            # Create/Get Weekly Folder under ROOT (ROOT/Week_X/)
+            print(f"Creating/getting folder for {ACTIVE_WEEK}...")
+            weekly_folder_id = create_or_get_contributor_folder(service, PROJECT_ROOT_ID, ACTIVE_WEEK)
 
             # Zip the data (DATA_PATH is defined in config.py)
             # Use user_name (email) as the zip file name
@@ -566,9 +566,9 @@ def main():
             print(f"Organizing data under folder: {user_name}")
             zip_file_path = zip_mp_data(DATA_PATH, zip_output, folder_name=user_name) 
             
-            # Upload (using the IDs we just generated)
-            print(f"Uploading to Google Drive...")
-            file_id = upload_zip_folder(service, zip_file_path, contributor_folder_id) 
+            # Upload zip directly to weekly folder
+            print(f"Uploading to Google Drive folder: {ACTIVE_WEEK}...")
+            file_id = upload_zip_folder(service, zip_file_path, weekly_folder_id) 
             
             if file_id:
                 print(f"\n✅ Success! Uploaded with ID: {file_id}")
