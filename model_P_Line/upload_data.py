@@ -64,18 +64,34 @@ def retry_on_failure(max_retries: int = MAX_RETRIES, delay: float = RETRY_DELAY,
 def get_drive_service():
     creds = None
     if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        try:
+            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        except Exception:
+            # If reading the file fails, treat it as missing
+            creds = None
 
+    # If no valid credentials, we need to log in or refresh
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
+            try:
+                # 1. Try to refresh the token automatically
+                creds.refresh(Request())
+            except Exception as e:
+                # 2. IF REFRESH FAILS: Print error and force a new login
+                print(f"⚠️ Token refresh failed: {e}")
+                print("🔄 Starting new login flow...")
+                creds = None # Discard the broken credentials
+        
+        # If we still don't have valid creds (because we had none, or refresh failed)
+        if not creds:
             if not os.path.exists(GOOGLE_CREDENTIALS_FILE):
                 raise FileNotFoundError(f"{GOOGLE_CREDENTIALS_FILE} not found.")
+            
             flow = InstalledAppFlow.from_client_secrets_file(GOOGLE_CREDENTIALS_FILE, SCOPES)
-            # Request offline access to get refresh_token
+            # 'access_type=offline' is CRITICAL to get a refresh_token for next time
             creds = flow.run_local_server(port=0, access_type='offline', prompt='consent')
 
+        # Save the new/refreshed token
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
     
