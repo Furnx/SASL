@@ -554,52 +554,58 @@ def main():
     print("\nSUCCESS! All data collected.")
 
     # Check if all signs for the active week are collected
-    mp_data_path = DATA_PATH
-
     # If complete, zip the folder for easier upload
     if is_week_complete(DATA_PATH, VOCAB_SCHEDULE, ACTIVE_WEEK):
         try:
             print("Authenticating with Google Drive...")
-            service = get_drive_service()  
+            service = get_drive_service()   
             
-            # Create/Get Weekly Folder under ROOT (ROOT/Week_X/)
             print(f"Creating/getting folder for {ACTIVE_WEEK}...")
             weekly_folder_id = create_or_get_contributor_folder(service, PROJECT_ROOT_ID, ACTIVE_WEEK)
 
-            # Zip the data (DATA_PATH is defined in config.py)
-            # Use user_name (email) as the zip file name
             zip_output = f"{user_name}.zip"
-            print(f"Zipping data to {zip_output}...")
-            print(f"Organizing data under folder: {user_name}")
-            zip_file_path = zip_mp_data(DATA_PATH, zip_output, folder_name=user_name) 
+            print(f"Zipping ONLY active week data to {zip_output}...")
             
-            # Upload zip directly to weekly folder
+            # 1. SURGICAL ZIP: Pass 'ACTIONS' to only zip current week's words
+            # (Make sure you updated upload_data.py to accept this list!)
+            zip_file_path = zip_mp_data(DATA_PATH, zip_output, ACTIONS, folder_name=user_name) 
+            
             print(f"Uploading to Google Drive folder: {ACTIVE_WEEK}...")
             file_id = upload_zip_folder(service, zip_file_path, weekly_folder_id) 
             
             if file_id:
                 print(f"\n✅ Success! Uploaded with ID: {file_id}")
-                
-                # Verify the upload
                 print("Verifying upload...")
+                
+                # 2. VERIFY UPLOAD (The check you were looking for)
                 if verify_upload(service, file_id, zip_file_path):
                     print("✅ Upload verified successfully!")
                     
-                    # Cleanup: Delete the temporary zip file
+                    # 3. DELETE TEMP ZIP
                     try:
                         os.remove(zip_file_path)
-                        print(f"✅ Cleaned up temporary file: {zip_file_path}")
-                    except Exception as cleanup_error:
-                        print(f"⚠️  Could not delete temporary file {zip_file_path}: {cleanup_error}")
+                        print(f"✅ Cleaned up temporary zip: {zip_file_path}")
+                    except Exception as e:
+                        print(f"⚠️  Could not delete zip: {e}")
+
+                    # 4. SAFE DELETE: Delete raw MP_Data (Only runs if verified!)
+                    try:
+                        print(f"🗑️  Deleting raw data folder: {DATA_PATH}...")
+                        shutil.rmtree(DATA_PATH)
+                        print(f"✅ Raw data deleted. Ready for next week!")
+                    except Exception as e:
+                        print(f"⚠️  Could not delete MP_Data: {e}")
+
                 else:
+                    # Verification failed - Keep files safe
                     print(f"⚠️  Upload verification failed - manual check recommended")
-                    print(f"Temporary file kept for manual inspection: {zip_file_path}")
+                    print(f"FILES KEPT SAFE. Temporary zip is at: {zip_file_path}")
             else:
-                print(f"❌ Upload failed. Temporary file kept: {zip_file_path}")
+                print(f"❌ Upload failed. Files kept safe.")
             
         except Exception as e:
             print(f"❌ Automation Error: {e}")
-            print(f"Temporary zip file may have been created: {user_name}.zip")
+            print("Files have been kept safe on your computer.")
     else:
         print(f"\n⚠️ Week {ACTIVE_WEEK} incomplete. Finish all signs to trigger upload.")
 

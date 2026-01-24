@@ -207,35 +207,42 @@ def verify_upload(service, file_id: str, local_file_path: str) -> bool:
         logger.error(f"Verification error: {e}")
         return False
 
-def zip_mp_data(source_dir: str, output_file: str, folder_name: Optional[str] = None) -> str:
+def zip_mp_data(source_dir: str, output_file: str, target_sign_list: list, folder_name: Optional[str] = None) -> str:
     """
-    Zip the MP_Data directory with all subdirectories and files.
-    Returns the path to the created zip file.
+    Surgically zips ONLY the folders matching the target_sign_list.
     """
     file_count = 0
     total_size = 0
     
-    logger.info(f"Starting to zip {source_dir}...")
+    logger.info(f"Starting surgical zip of {len(target_sign_list)} signs...")
     
     with zipfile.ZipFile(output_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(source_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, source_dir)
-                if folder_name:
-                    arcname = os.path.join(folder_name, arcname)
-                
-                zipf.write(file_path, arcname)
-                file_count += 1
-                total_size += os.path.getsize(file_path)
-                
-                # Log progress every 500 files
-                if file_count % 500 == 0:
-                    logger.info(f"  Zipped {file_count} files so far...")
-    
+        # Loop ONLY through the specific signs we want (e.g., ['hello', 'goodbye'])
+        for sign in target_sign_list:
+            sign_path = os.path.join(source_dir, sign)
+            
+            if not os.path.exists(sign_path):
+                logger.warning(f"Skipping {sign} - folder not found!")
+                continue
+
+            # Walk through this specific sign's folder
+            for root, dirs, files in os.walk(sign_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    
+                    # Calculate the internal zip path
+                    rel_path = os.path.relpath(file_path, source_dir)
+                    if folder_name:
+                        arcname = os.path.join(folder_name, rel_path)
+                    else:
+                        arcname = rel_path
+                    
+                    zipf.write(file_path, arcname)
+                    file_count += 1
+                    total_size += os.path.getsize(file_path)
+
     zip_size = os.path.getsize(output_file)
     logger.info(f"[OK] Zipped {file_count} files ({total_size / (1024*1024):.2f} MB)")
-    logger.info(f"[OK] Zip file size: {zip_size / (1024*1024):.2f} MB")
     
     return output_file
 
