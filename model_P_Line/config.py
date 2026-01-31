@@ -228,7 +228,7 @@ VOCAB_SCHEDULE = {
 
 # !!! CHANGE THIS VARIABLE TO WORK ON A SPECIFIC WEEK !!!
 # Options: 'Week_1_Greetings', 'Week_2_Manners', 'All', etc.
-ACTIVE_WEEK = 'Week_1_Greetings'
+ACTIVE_WEEK = 'Week_3_Questions'
 
 def get_actions():
     """
