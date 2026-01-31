@@ -98,3 +98,37 @@ Starting Upload: Week_1_Greetings
 2026-01-22 08:43:38,013 - __main__ - INFO - [OK] File sizes match!
 2026-01-22 08:43:38,013 - __main__ - INFO - Upload verified successfully!
 2026-01-22 08:43:38,029 - __main__ - INFO - Cleaned up temporary file: morenathi8@gmail.com.zip
+2026-01-25 12:38:17,136 - google_auth_oauthlib.flow - INFO - "GET /?state=CZppgvMTJzeMesmG00dqZZbIGD6cUp&code=4/0ASc3gC1hMK9uLAu9gFtaXIicD-qMqFv6I0VtgylBnfCJ-jENcAAPIgQw-Jq1UwTkuEBxAg&scope=https://www.googleapis.com/auth/drive HTTP/1.1" 200 65
+2026-01-25 12:38:18,008 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-01-25 12:38:33,610 - upload_data - INFO - Starting surgical zip of 8 signs...
+2026-01-25 12:42:42,126 - upload_data - INFO - [OK] Zipped 7200 files (92.18 MB)
+2026-01-25 12:42:42,152 - upload_data - INFO - Starting upload of morenathi8@gmail.com_2.zip (49.21 MB)
+2026-01-25 12:42:46,957 - upload_data - INFO - Upload progress: 10%
+2026-01-25 12:42:51,096 - upload_data - INFO - Upload progress: 20%
+2026-01-25 12:42:55,421 - upload_data - INFO - Upload progress: 30%
+2026-01-25 12:42:59,149 - upload_data - INFO - Upload progress: 40%
+2026-01-25 12:43:02,766 - upload_data - INFO - Upload progress: 50%
+2026-01-25 12:43:06,504 - upload_data - INFO - Upload progress: 60%
+2026-01-25 12:43:23,171 - upload_data - INFO - [OK] Upload completed! File ID: 1O_Z2cStuIYb5aoNvTGVRuQ39rhZbC3Z-, Size: 51595809 bytes
+2026-01-25 12:43:23,554 - upload_data - INFO - Verification:
+2026-01-25 12:43:23,554 - upload_data - INFO -   Local file:  morenathi8@gmail.com_2.zip (51,595,809 bytes)
+2026-01-25 12:43:23,554 - upload_data - INFO -   Remote file: morenathi8@gmail.com_2.zip (51,595,809 bytes)
+2026-01-25 12:43:23,554 - upload_data - INFO - [OK] File sizes match!
+2026-01-25 18:15:13,902 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-01-25 18:15:15,100 - upload_data - INFO - Starting surgical zip of 8 signs...
+2026-01-25 18:16:38,759 - upload_data - INFO - [OK] Zipped 7200 files (92.18 MB)
+2026-01-25 18:16:38,798 - upload_data - INFO - Starting upload of morenathi8@gmail.com_3.zip (49.77 MB)
+2026-01-25 18:16:46,263 - upload_data - INFO - Upload progress: 10%
+2026-01-25 18:16:51,087 - upload_data - INFO - Upload progress: 20%
+2026-01-25 18:16:56,019 - upload_data - INFO - Upload progress: 30%
+2026-01-25 18:17:00,622 - upload_data - INFO - Upload progress: 40%
+2026-01-25 18:17:05,560 - upload_data - INFO - Upload progress: 50%
+2026-01-25 18:17:10,631 - upload_data - INFO - Upload progress: 60%
+2026-01-25 18:17:16,454 - upload_data - INFO - Upload progress: 70%
+2026-01-25 18:17:21,259 - upload_data - INFO - Upload progress: 80%
+2026-01-25 18:17:27,732 - upload_data - INFO - Upload progress: 90%
+2026-01-25 18:17:34,082 - upload_data - INFO - [OK] Upload completed! File ID: 1fV03WR2z-OtnV82bssAUrD_ko3LpinF_, Size: 52191199 bytes
+2026-01-25 18:17:34,474 - upload_data - INFO - Verification:
+2026-01-25 18:17:34,475 - upload_data - INFO -   Local file:  morenathi8@gmail.com_3.zip (52,191,199 bytes)
+2026-01-25 18:17:34,475 - upload_data - INFO -   Remote file: morenathi8@gmail.com_3.zip (52,191,199 bytes)
+2026-01-25 18:17:34,475 - upload_data - INFO - [OK] File sizes match!

@@ -209,12 +209,12 @@ def verify_upload(service, file_id: str, local_file_path: str) -> bool:
 
 def zip_mp_data(source_dir: str, output_file: str, target_sign_list: list, folder_name: Optional[str] = None) -> str:
     """
-    Surgically zips ONLY the folders matching the target_sign_list.
+    Zips ONLY the folders matching the target_sign_list.
     """
     file_count = 0
     total_size = 0
     
-    logger.info(f"Starting surgical zip of {len(target_sign_list)} signs...")
+    logger.info(f"Starting zip of {len(target_sign_list)} signs...")
     
     with zipfile.ZipFile(output_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
         # Loop ONLY through the specific signs we want (e.g., ['hello', 'goodbye'])

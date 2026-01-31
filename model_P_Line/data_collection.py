@@ -566,7 +566,7 @@ def main():
             zip_output = f"{user_name}.zip"
             print(f"Zipping ONLY active week data to {zip_output}...")
             
-            # 1. SURGICAL ZIP: Pass 'ACTIONS' to only zip current week's words
+            # 1. ZIP: Pass 'ACTIONS' to only zip current week's words
             # (Make sure you updated upload_data.py to accept this list!)
             zip_file_path = zip_mp_data(DATA_PATH, zip_output, ACTIONS, folder_name=user_name) 
             
