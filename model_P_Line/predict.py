@@ -6,6 +6,7 @@ Updates:
   - Checks for Model/Config mismatches
 """
 
+from xml.parsers.expat import model
 import cv2
 import numpy as np
 import os
@@ -109,7 +110,7 @@ def predict():
     
     # Safety Check: Does config.py match the model?
     # model.layers[-1].output_shape[1] is the number of neurons in the last layer
-    model_output_shape = model.layers[-1].output_shape[1]
+    model_output_shape = model.layers[-1].units
     config_actions_len = len(ACTIONS)
     
     if model_output_shape != config_actions_len:
