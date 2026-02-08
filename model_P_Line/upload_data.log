@@ -1,19 +1,10 @@
-2026-01-31 12:33:25,510 - __main__ - INFO - ==============================
-Starting Upload: Week_3_Questions
-==============================
-2026-01-31 12:33:26,640 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
-2026-01-31 12:33:52,455 - __main__ - INFO - Creating/getting folder for Week_3_Questions...
-2026-01-31 12:33:52,959 - __main__ - INFO - Zipping data to mainBranch@gmail.com.zip...
-2026-01-31 12:33:52,959 - __main__ - INFO - Organizing data under folder: mainBranch@gmail.com
-2026-01-31 12:33:52,960 - __main__ - ERROR - Process failed: zip_mp_data() missing 1 required positional argument: 'target_sign_list'
-2026-01-31 12:36:25,822 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
-2026-01-31 12:36:27,136 - upload_data - INFO - Starting zip of 9 signs...
-2026-01-31 12:39:31,358 - upload_data - INFO - [OK] Zipped 8100 files (103.70 MB)
-2026-01-31 12:39:31,387 - upload_data - INFO - Starting upload of mainBranch@gmail.com.zip (55.65 MB)
-2026-01-31 12:39:39,876 - upload_data - INFO - Upload progress: 35%
-2026-01-31 12:39:48,232 - upload_data - INFO - Upload progress: 80%
-2026-01-31 12:39:54,122 - upload_data - INFO - [OK] Upload completed! File ID: 1yzmt0P7yrHuw6onhdy8oNIUIqIkkEtJt, Size: 58354220 bytes
-2026-01-31 12:39:54,517 - upload_data - INFO - Verification:
-2026-01-31 12:39:54,517 - upload_data - INFO -   Local file:  mainBranch@gmail.com.zip (58,354,220 bytes)
-2026-01-31 12:39:54,517 - upload_data - INFO -   Remote file: mainBranch@gmail.com.zip (58,354,220 bytes)
-2026-01-31 12:39:54,518 - upload_data - INFO - [OK] File sizes match!
+2026-02-02 22:50:44,924 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-02-02 22:50:46,049 - upload_data - INFO - Starting zip of 9 signs...
+2026-02-02 22:53:05,780 - upload_data - INFO - [OK] Zipped 8100 files (103.70 MB)
+2026-02-02 22:53:05,800 - upload_data - INFO - Starting upload of tumomogame9@gmail.com.zip (56.28 MB)
+2026-02-02 22:53:13,488 - upload_data - INFO - Upload progress: 35%
+2026-02-02 22:53:30,321 - upload_data - INFO - [OK] Upload completed! File ID: 1VWjaSNPvFzAz3pNxX_AzxzB4O1oT_6Uw, Size: 59009973 bytes
+2026-02-02 22:53:30,737 - upload_data - INFO - Verification:
+2026-02-02 22:53:30,737 - upload_data - INFO -   Local file:  tumomogame9@gmail.com.zip (59,009,973 bytes)
+2026-02-02 22:53:30,737 - upload_data - INFO -   Remote file: tumomogame9@gmail.com.zip (59,009,973 bytes)
+2026-02-02 22:53:30,737 - upload_data - INFO - [OK] File sizes match!
