@@ -18,9 +18,12 @@ import time
 import numpy as np
 from tensorflow.keras.models import load_model
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-from config import ACTIONS, get_model_path
-from train import load_data
+from config import ACTIONS, get_model_path, SEQUENCE_LENGTH, TOTAL_FEATURES
+from train import load_and_process_data
 
 # =============================================================================
 # COMPARISON FUNCTIONS
@@ -46,14 +49,15 @@ def get_model_info(model_path):
         'trainable_params': trainable_params
     }
 
-def measure_inference_speed(model, X_test, num_runs=100):
-    """Measure average inference time"""
+def measure_inference_speed(model, input_shape, num_runs=100):
+    """Measure average inference time using synthetic data"""
     times = []
     
+    # Create synthetic test samples (random data with correct shape)
+    # This avoids loading the entire dataset
     for _ in range(num_runs):
-        # Random sample
-        idx = np.random.randint(0, len(X_test))
-        sample = np.expand_dims(X_test[idx], axis=0)
+        # Generate random sample matching the model input shape
+        sample = np.random.randn(1, *input_shape)
         
         # Time prediction
         start = time.time()
@@ -69,17 +73,66 @@ def measure_inference_speed(model, X_test, num_runs=100):
         'max_ms': np.max(times) * 1000
     }
 
-def evaluate_model(model, X_train, y_train, X_val, y_val):
-    """Evaluate model on train and validation sets"""
-    train_loss, train_acc = model.evaluate(X_train, y_train, verbose=0)
-    val_loss, val_acc = model.evaluate(X_val, y_val, verbose=0)
+def evaluate_model_performance(model, X_test, y_test, model_name):
+    """Evaluate model and return metrics"""
+    print(f"  Evaluating {model_name}...")
+    
+    # Get predictions
+    y_pred_probs = model.predict(X_test, verbose=0)
+    y_pred = np.argmax(y_pred_probs, axis=1)
+    y_true = np.argmax(y_test, axis=1)
+    
+    # Calculate metrics
+    loss, accuracy = model.evaluate(X_test, y_test, verbose=0)
+    
+    # Confusion matrix
+    cm = confusion_matrix(y_true, y_pred)
+    
+    # Per-class accuracy
+    class_accuracy = cm.diagonal() / cm.sum(axis=1)
     
     return {
-        'train_loss': train_loss,
-        'train_acc': train_acc,
-        'val_loss': val_loss,
-        'val_acc': val_acc
+        'loss': loss,
+        'accuracy': accuracy,
+        'predictions': y_pred,
+        'true_labels': y_true,
+        'confusion_matrix': cm,
+        'class_accuracy': class_accuracy,
+        'pred_probs': y_pred_probs
     }
+
+def plot_confusion_matrix(cm, model_name, save_path=None):
+    """Plot confusion matrix"""
+    plt.figure(figsize=(12, 10))
+    
+    # Use action names if length matches
+    labels = ACTIONS if len(ACTIONS) == len(cm) else [f"Class {i}" for i in range(len(cm))]
+    
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
+                xticklabels=labels, yticklabels=labels,
+                cbar_kws={'label': 'Count'})
+    
+    plt.title(f'Confusion Matrix - {model_name}', fontsize=16, fontweight='bold')
+    plt.ylabel('True Label', fontsize=12)
+    plt.xlabel('Predicted Label', fontsize=12)
+    plt.xticks(rotation=45, ha='right')
+    plt.yticks(rotation=0)
+    plt.tight_layout()
+    
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        print(f"  Saved to {save_path}")
+    
+    plt.close()
+
+def print_classification_report(y_true, y_pred, model_name):
+    """Print detailed classification report"""
+    labels = ACTIONS if len(ACTIONS) == np.max(y_true) + 1 else [f"Class {i}" for i in range(np.max(y_true) + 1)]
+    
+    print(f"\n{model_name} - Detailed Classification Report:")
+    print("-" * 80)
+    report = classification_report(y_true, y_pred, target_names=labels, digits=4)
+    print(report)
 
 # =============================================================================
 # MAIN COMPARISON
@@ -91,20 +144,20 @@ def compare_models():
     print("MODEL COMPARISON: LSTM vs TRANSFORMER")
     print("="*80 + "\n")
     
-    # Load data
-    print("Loading data...")
-    X, y = load_data()
+    # Load test data for performance evaluation
+    print("Loading test data for performance evaluation...")
+    X, y = load_and_process_data()
     
     if len(X) == 0:
-        print("❌ ERROR: No data loaded!")
+        print("❌ ERROR: No data loaded! Cannot compare model performance.")
         return
     
-    # Split data
-    X_train, X_val, y_train, y_val = train_test_split(
+    # Split data - use 20% for testing
+    _, X_test, _, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y.argmax(axis=1)
     )
     
-    print(f"Dataset: {len(X)} samples ({len(X_train)} train, {len(X_val)} val)\n")
+    print(f"Test dataset: {len(X_test)} samples\n")
     
     # Model paths
     lstm_path = get_model_path()
@@ -149,55 +202,77 @@ def compare_models():
     print(f"{'Model Size':<30} {lstm_size:<25} {trans_size:<25}")
     print(f"{'Total Parameters':<30} {lstm_params:<25} {trans_params:<25}")
     
-    # Accuracy comparison
+    # Performance evaluation
     print("\n" + "="*80)
-    print("2. ACCURACY")
+    print("2. PERFORMANCE METRICS (Accuracy, Loss, Error)")
     print("="*80 + "\n")
     
+    lstm_perf = None
+    transformer_perf = None
+    
     if lstm_info:
-        print("Evaluating LSTM model...")
-        lstm_metrics = evaluate_model(
-            lstm_info['model'], X_train, y_train, X_val, y_val
+        lstm_perf = evaluate_model_performance(
+            lstm_info['model'], X_test, y_test, "LSTM"
         )
     
     if transformer_info:
-        print("Evaluating Transformer model...")
-        transformer_metrics = evaluate_model(
-            transformer_info['model'], X_train, y_train, X_val, y_val
+        transformer_perf = evaluate_model_performance(
+            transformer_info['model'], X_test, y_test, "Transformer"
         )
     
     print(f"\n{'Metric':<30} {'LSTM':<25} {'Transformer':<25}")
     print("-" * 80)
     
-    if lstm_info:
-        lstm_train = f"{lstm_metrics['train_acc']*100:.2f}%"
-        lstm_val = f"{lstm_metrics['val_acc']*100:.2f}%"
+    if lstm_perf:
+        lstm_acc = f"{lstm_perf['accuracy']*100:.2f}%"
+        lstm_loss = f"{lstm_perf['loss']:.4f}"
+        lstm_err = f"{(1-lstm_perf['accuracy'])*100:.2f}%"
     else:
-        lstm_train = "N/A"
-        lstm_val = "N/A"
+        lstm_acc = "N/A"
+        lstm_loss = "N/A"
+        lstm_err = "N/A"
     
-    if transformer_info:
-        trans_train = f"{transformer_metrics['train_acc']*100:.2f}%"
-        trans_val = f"{transformer_metrics['val_acc']*100:.2f}%"
+    if transformer_perf:
+        trans_acc = f"{transformer_perf['accuracy']*100:.2f}%"
+        trans_loss = f"{transformer_perf['loss']:.4f}"
+        trans_err = f"{(1-transformer_perf['accuracy'])*100:.2f}%"
     else:
-        trans_train = "N/A"
-        trans_val = "N/A"
+        trans_acc = "N/A"
+        trans_loss = "N/A"
+        trans_err = "N/A"
     
-    print(f"{'Training Accuracy':<30} {lstm_train:<25} {trans_train:<25}")
-    print(f"{'Validation Accuracy':<30} {lstm_val:<25} {trans_val:<25}")
-
+    print(f"{'Test Accuracy':<30} {lstm_acc:<25} {trans_acc:<25}")
+    print(f"{'Test Loss':<30} {lstm_loss:<25} {trans_loss:<25}")
+    print(f"{'Error Rate':<30} {lstm_err:<25} {trans_err:<25}")
+    
+    # Per-class accuracy
+    if lstm_perf:
+        print(f"\nLSTM - Per-Class Accuracy:")
+        for i, acc in enumerate(lstm_perf['class_accuracy']):
+            action_name = ACTIONS[i] if i < len(ACTIONS) else f"Class {i}"
+            print(f"  {action_name:<20}: {acc*100:>6.2f}%")
+    
+    if transformer_perf:
+        print(f"\nTransformer - Per-Class Accuracy:")
+        for i, acc in enumerate(transformer_perf['class_accuracy']):
+            action_name = ACTIONS[i] if i < len(ACTIONS) else f"Class {i}"
+            print(f"  {action_name:<20}: {acc*100:>6.2f}%")
+    
+    # Input shape for testing
+    input_shape = (SEQUENCE_LENGTH, TOTAL_FEATURES)
+    
     # Inference speed comparison
     print("\n" + "="*80)
     print("3. INFERENCE SPEED")
     print("="*80 + "\n")
 
     if lstm_info:
-        print("Measuring LSTM inference speed (100 runs)...")
-        lstm_speed = measure_inference_speed(lstm_info['model'], X_val, num_runs=100)
+        print("Measuring LSTM inference speed (100 runs with synthetic data)...")
+        lstm_speed = measure_inference_speed(lstm_info['model'], input_shape, num_runs=100)
 
     if transformer_info:
-        print("Measuring Transformer inference speed (100 runs)...")
-        transformer_speed = measure_inference_speed(transformer_info['model'], X_val, num_runs=100)
+        print("Measuring Transformer inference speed (100 runs with synthetic data)...")
+        transformer_speed = measure_inference_speed(transformer_info['model'], input_shape, num_runs=100)
 
     print(f"\n{'Metric':<30} {'LSTM':<25} {'Transformer':<25}")
     print("-" * 80)
@@ -218,25 +293,70 @@ def compare_models():
 
     print(f"{'Average Inference Time':<30} {lstm_mean:<25} {trans_mean:<25}")
     print(f"{'Standard Deviation':<30} {lstm_std:<25} {trans_std:<25}")
+    
+    # Confusion Matrix
+    print("\n" + "="*80)
+    print("4. CONFUSION MATRICES")
+    print("="*80 + "\n")
+    
+    if lstm_perf:
+        print("Generating LSTM confusion matrix...")
+        plot_confusion_matrix(
+            lstm_perf['confusion_matrix'], 
+            "LSTM",
+            "model/lstm_confusion_matrix.png"
+        )
+        print("\nLSTM Confusion Matrix:")
+        print(lstm_perf['confusion_matrix'])
+        print_classification_report(
+            lstm_perf['true_labels'], 
+            lstm_perf['predictions'], 
+            "LSTM"
+        )
+    
+    if transformer_perf:
+        print("\nGenerating Transformer confusion matrix...")
+        plot_confusion_matrix(
+            transformer_perf['confusion_matrix'], 
+            "Transformer",
+            "model/transformer_confusion_matrix.png"
+        )
+        print("\nTransformer Confusion Matrix:")
+        print(transformer_perf['confusion_matrix'])
+        print_classification_report(
+            transformer_perf['true_labels'], 
+            transformer_perf['predictions'], 
+            "Transformer"
+        )
 
     # Summary
     print("\n" + "="*80)
-    print("4. SUMMARY & RECOMMENDATIONS")
+    print("5. SUMMARY & RECOMMENDATIONS")
     print("="*80 + "\n")
 
-    if lstm_info and transformer_info:
+    if lstm_info and transformer_info and lstm_perf and transformer_perf:
         # Determine winner for each category
         print("📊 COMPARISON RESULTS:\n")
-
+        
         # Accuracy winner
-        if transformer_metrics['val_acc'] > lstm_metrics['val_acc']:
-            acc_diff = (transformer_metrics['val_acc'] - lstm_metrics['val_acc']) * 100
+        if transformer_perf['accuracy'] > lstm_perf['accuracy']:
+            acc_diff = (transformer_perf['accuracy'] - lstm_perf['accuracy']) * 100
             print(f"✓ Accuracy: Transformer wins by {acc_diff:.2f}%")
-        elif lstm_metrics['val_acc'] > transformer_metrics['val_acc']:
-            acc_diff = (lstm_metrics['val_acc'] - transformer_metrics['val_acc']) * 100
+        elif lstm_perf['accuracy'] > transformer_perf['accuracy']:
+            acc_diff = (lstm_perf['accuracy'] - transformer_perf['accuracy']) * 100
             print(f"✓ Accuracy: LSTM wins by {acc_diff:.2f}%")
         else:
             print(f"✓ Accuracy: Tie")
+        
+        # Loss winner (lower is better)
+        if transformer_perf['loss'] < lstm_perf['loss']:
+            loss_diff = lstm_perf['loss'] - transformer_perf['loss']
+            print(f"✓ Loss: Transformer wins (lower by {loss_diff:.4f})")
+        elif lstm_perf['loss'] < transformer_perf['loss']:
+            loss_diff = transformer_perf['loss'] - lstm_perf['loss']
+            print(f"✓ Loss: LSTM wins (lower by {loss_diff:.4f})")
+        else:
+            print(f"✓ Loss: Tie")
 
         # Speed winner
         if transformer_speed['mean_ms'] < lstm_speed['mean_ms']:
@@ -260,20 +380,25 @@ def compare_models():
 
         print("\n💡 RECOMMENDATIONS:\n")
 
-        # Overall recommendation
-        if transformer_metrics['val_acc'] > lstm_metrics['val_acc']:
-            print("→ Use TRANSFORMER for:")
-            print("  • Better accuracy and generalization")
-            print("  • Attention mechanism shows which frames are important")
-            print("  • State-of-the-art architecture")
-            print("\n→ Use LSTM for:")
-            print("  • Simpler architecture, easier to understand")
-            print("  • Potentially faster inference (if speed is critical)")
+        # Overall recommendation based on accuracy
+        if transformer_perf['accuracy'] > lstm_perf['accuracy']:
+            print("→ 🏆 WINNER: Transformer")
+            print(f"  • {transformer_perf['accuracy']*100:.2f}% accuracy vs {lstm_perf['accuracy']*100:.2f}%")
+            print("  • Better at capturing complex patterns")
+            print("  • Attention mechanism provides interpretability")
+        elif lstm_perf['accuracy'] > transformer_perf['accuracy']:
+            print("→ 🏆 WINNER: LSTM")
+            print(f"  • {lstm_perf['accuracy']*100:.2f}% accuracy vs {transformer_perf['accuracy']*100:.2f}%")
+            print("  • Simpler and more efficient")
+            print("  • Better generalization for this dataset")
         else:
-            print("→ Both models perform similarly!")
-            print("  • Try collecting more data")
-            print("  • Try data augmentation")
-            print("  • Experiment with hyperparameters")
+            print("→ 🤝 TIE: Both models perform similarly")
+            print("  • Consider inference speed and model size for deployment")
+        
+        print("\n→ Check confusion matrices:")
+        print("  • model/lstm_confusion_matrix.png")
+        print("  • model/transformer_confusion_matrix.png")
+        print("\n→ Review detailed metrics above for per-class performance")
 
     print("\n" + "="*80 + "\n")
 
