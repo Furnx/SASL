@@ -3,6 +3,8 @@ import { Mic, MicOff, Activity, Video, VideoOff, Users } from 'lucide-react';
 
 import AppBar from './components/appbar';
 import Home from './pages/home';
+import Navbar from './components/navbar';
+import PrivacyPolicy from './pages/privacy_policy';
 
 export default function App() {
  

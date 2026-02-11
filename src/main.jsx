@@ -10,6 +10,7 @@ import Home from './pages/home.jsx'
 import './styles/css/index.css'
 import  About  from './pages/about.jsx';
 import PrivacyPolicy from './pages/privacy_policy.jsx';
+import Navbar from './components/navbar';
 
 
 ReactDOM.createRoot((document.getElementById('root'))).render(
