@@ -8,7 +8,7 @@ import UserAccountButton from "./userAvatar";
 return(
 <section>
 <div className="flex justify-between px-5">
-<h1 className="appbar_title"> W.T.C SASL</h1>
+<h1 className="appbar_title">W.T.C SASL</h1>
 <div className="flex gap-2">
     <UserAccountButton/>
     
