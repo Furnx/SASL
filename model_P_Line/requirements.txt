@@ -8,3 +8,31 @@ google-api-python-client >=2.70
 google-auth-httplib2 >=0.1.0
 google-auth-oauthlib >=1.0.0
 seaborn
+
+
+# LLM Integration Requirements
+# Install these dependencies for the LLM prediction improvement features
+
+# Core LangChain and OpenAI
+langchain>=0.0.350
+openai>=1.0.0
+
+# LangChain community packages
+langchain-openai>=0.0.2
+langchain-community>=0.0.10
+
+# For conversation memory
+langchain-core>=0.1.0
+
+# GUI for popup windows (usually included with Python)
+tkinter  # Standard library, no install needed
+
+# Text-to-Speech (OPTIONAL - uncomment when needed)
+# pyttsx3>=2.90
+
+# JSON and Path handling (Standard library)
+# json
+# pathlib
+
+# Additional utilities
+# python-dotenv  # If you want to use .env files for API keys

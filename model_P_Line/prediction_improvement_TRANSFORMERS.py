@@ -14,6 +14,8 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 from datetime import datetime
 import logging
+import json
+from pathlib import Path
 
 # Import configuration
 from config import (
@@ -96,6 +98,33 @@ def is_significant_movement(movement, threshold=0.05):
     Check if the movement is significant enough to warrant a prediction.
     """
     return movement > threshold
+
+# =============================================================================
+# LLM INTEGRATION FUNCTIONS
+# =============================================================================
+def share_prediction_with_llm(predicted_sign):
+    """
+    Share the predicted sign with the LLM integration script (Transformer).
+    """
+    try:
+        shared_file = Path("shared_predictions_transformer.json")
+        
+        # Read existing data or create new
+        if shared_file.exists():
+            with open(shared_file, 'r') as f:
+                data = json.load(f)
+        else:
+            data = {'predictions': []}
+        
+        # Add new prediction
+        data['predictions'].append(predicted_sign)
+        
+        # Write back to file
+        with open(shared_file, 'w') as f:
+            json.dump(data, f)
+            
+    except Exception as e:
+        logging.getLogger(__name__).warning(f"Error sharing prediction with LLM: {e}")
 
 # =============================================================================
 # VISUALIZATION FUNCTION
@@ -315,9 +344,13 @@ def predict_improved():
                         if predicted_sign != sentence[-1]:
                             sentence.append(predicted_sign)
                             logger.info(f"  [+] Added '{predicted_sign}' to sentence")
+                            # Share with LLM integration
+                            share_prediction_with_llm(predicted_sign)
                     else:
                         sentence.append(predicted_sign)
                         logger.info(f"  [+] Added '{predicted_sign}' to sentence (first word)")
+                        # Share with LLM integration
+                        share_prediction_with_llm(predicted_sign)
                     
                     # Display confidence
                     cv2.putText(image, f'CONF: {confidence:.2f}', (450, 30), 
