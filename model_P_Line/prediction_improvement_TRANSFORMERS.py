@@ -175,31 +175,39 @@ def predict_improved():
     logger.info(f"[OK] Transformer model loaded successfully! Knows {len(ACTIONS)} signs.")
     print(f"✅ Transformer Model loaded! It knows {len(ACTIONS)} signs.")
     print("📷 Starting Camera...")
-    print("\n🎯 Improved Prediction Features (Transformer):")
-    print("   ✓ Collects 30 frames when movement detected")
-    print("   ✓ Makes predictions continuously during movement")
+    print("🎯 Hybrid Prediction Features (Transformer):")
+    print("   ✓ Maintains rolling 30-frame buffer continuously")
+    print("   ✓ Only predicts during sustained movement (3+ frames)")
+    print("   ✓ Handles fast sign language movements")
+    print("   ✓ Prediction cooldown prevents spam")
     print("   ✓ Comprehensive logging enabled")
     print("   ✓ Using Transformer architecture\n")
 
-    # 3. Initialize tracking variables
-    sequence = []
+    # 3. Initialize tracking variables for hybrid approach
+    rolling_buffer = []  # Always maintains 30 frames
     sentence = []
     previous_keypoints = None
-    movement_history = []  # Track movement values
+    movement_history = []  # Track movement values for the rolling buffer
     
-    movement_threshold = 0.02  # Lowered from 0.05 to capture slower movements
-    grace_period = 15  # Increased from 10 to allow longer pauses
-    frames_below_threshold = 0  # Counter for frames with low movement
+    movement_threshold = 0.02  # Threshold for detecting movement
+    prediction_cooldown = 5  # Frames to wait between predictions during movement
+    frames_since_prediction = 0  # Counter for prediction cooldown
+    
+    # Movement detection variables
+    movement_detected = False
+    consecutive_movement_frames = 0
+    min_movement_frames = 3  # Minimum frames of movement before predicting
     
     logger.info(f"Movement threshold set to: {movement_threshold}")
-    logger.info(f"Grace period set to: {grace_period} frames")
+    logger.info(f"Prediction cooldown set to: {prediction_cooldown} frames")
+    logger.info(f"Minimum movement frames required: {min_movement_frames}")
     
     # Statistics tracking
     total_frames = 0
     frames_with_movement = 0
     total_predictions = 0
-    sequence_count = 0
-    predictions_this_sequence = 0
+    movement_sessions = 0
+    predictions_this_session = 0
     
     cap = cv2.VideoCapture(0)
     logger.info("Camera initialized")
@@ -226,135 +234,144 @@ def predict_improved():
             # Extract keypoints
             keypoints = extract_keypoints(results)
             
+            # HYBRID APPROACH: Always maintain rolling buffer + movement-gated predictions
+            
+            # Always add frame to rolling buffer
+            rolling_buffer.append(keypoints)
+            rolling_buffer = rolling_buffer[-SEQUENCE_LENGTH:]  # Keep last 30 frames
+            
             # Calculate hand movement
             movement = calculate_hand_movement(keypoints, previous_keypoints)
             previous_keypoints = keypoints.copy()
             
-            # Track movement in sequence
-            if len(sequence) > 0:
-                movement_history.append(movement)
+            # Track movement history for rolling buffer
+            movement_history.append(movement)
+            movement_history = movement_history[-SEQUENCE_LENGTH:]
             
             # Check if there's significant movement
             has_movement = is_significant_movement(movement, movement_threshold)
+            frames_since_prediction += 1
             
             if has_movement:
                 frames_with_movement += 1
-                frames_below_threshold = 0  # Reset grace period counter
+                consecutive_movement_frames += 1
                 
-                # Start new sequence if needed
-                if len(sequence) == 0:
-                    sequence_count += 1
-                    predictions_this_sequence = 0
-                    movement_history = [movement]
-                    logger.info(f"--- SEQUENCE #{sequence_count} STARTED (Initial Movement: {movement:.4f}) ---")
+                # Start new movement session if needed
+                if not movement_detected:
+                    movement_sessions += 1
+                    predictions_this_session = 0
+                    movement_detected = True
+                    logger.info(f"--- MOVEMENT SESSION #{movement_sessions} STARTED (Movement: {movement:.4f}) ---")
                 
-                # Add to sequence
-                sequence.append(keypoints)
-                current_seq_len = len(sequence)
-                
-                # Keep last 30 frames
-                sequence = sequence[-SEQUENCE_LENGTH:]
-                movement_history = movement_history[-SEQUENCE_LENGTH:]
-
-                if len(sequence) == SEQUENCE_LENGTH:
-                    # Calculate average movement for this sequence
-                    avg_movement = np.mean(movement_history)
-                    
-                    # Make prediction
-                    total_predictions += 1
-                    predictions_this_sequence += 1
-                    logger.info(f"Making prediction #{total_predictions} for sequence #{sequence_count} (Avg movement: {avg_movement:.4f})")
-                    
-                    res = model.predict(np.expand_dims(sequence, axis=0), verbose=0)[0]
-                    
-                    # Get top 5 predictions
-                    top_5_indices = np.argsort(res)[-5:][::-1]
-                    
-                    logger.info(f"  Top 5 predictions:")
-                    for i, idx in enumerate(top_5_indices, 1):
-                        logger.info(f"    {i}. {ACTIONS[idx]}: {res[idx]*100:.2f}%")
-                    
-                    # Get the best prediction
-                    best_class_index = np.argmax(res)
-                    confidence = res[best_class_index]
-                    predicted_sign = ACTIONS[best_class_index]
-                    
-                    logger.info(f"  BEST: {predicted_sign} (confidence: {confidence*100:.2f}%)")
-
-                    # Visualization (Top 5 Probabilities)
-                    image = draw_probability_bars(image, res, ACTIONS, len(sequence))
-
-                    # Lowered confidence threshold to 50%
-                    if confidence > 0.5:
-                        if len(sentence) > 0:
-                            if predicted_sign != sentence[-1]:
-                                sentence.append(predicted_sign)
-                                logger.info(f"  [+] Added '{predicted_sign}' to sentence")
-                        else:
-                            sentence.append(predicted_sign)
-                            logger.info(f"  [+] Added '{predicted_sign}' to sentence (first word)")
-                        
-                        # Display confidence
-                        cv2.putText(image, f'CONF: {confidence:.2f}', (450, 30), 
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
-                    else:
-                        logger.info(f"  [!] Confidence too low ({confidence*100:.2f}%), not adding to sentence")
-                    
-                    if len(sentence) > 5: 
-                        sentence = sentence[-5:]
-                    
-                # Display sequence info with average movement
-                if len(movement_history) > 0:
-                    avg_mov = np.mean(movement_history)
-                    
-                    # Progress bar for frame collection
-                    progress_text = f'Collecting: {len(sequence)}/{SEQUENCE_LENGTH} frames'
-                    cv2.putText(image, progress_text, (10, 430), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2, cv2.LINE_AA)
-                    
-                    # Draw progress bar
-                    bar_width = 200
-                    bar_height = 20
-                    bar_x = 10
-                    bar_y = 440
-                    progress = len(sequence) / SEQUENCE_LENGTH
-                    
-                    # Background
-                    cv2.rectangle(image, (bar_x, bar_y), (bar_x + bar_width, bar_y + bar_height), (50, 50, 50), -1)
-                    # Progress
-                    cv2.rectangle(image, (bar_x, bar_y), (bar_x + int(bar_width * progress), bar_y + bar_height), (0, 255, 255), -1)
-                    # Border
-                    cv2.rectangle(image, (bar_x, bar_y), (bar_x + bar_width, bar_y + bar_height), (255, 255, 255), 2)
-                    
-                    # Stats below
-                    cv2.putText(image, f'Seq: {sequence_count} | Avg Mov: {avg_mov:.3f}', 
-                               (10, 475), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
             else:
-                # No significant movement - use grace period
-                if len(sequence) > 0:
-                    frames_below_threshold += 1
-                    
-                    # Still add frame to sequence during grace period
-                    if frames_below_threshold <= grace_period:
-                        sequence.append(keypoints)
-                        movement_history.append(movement)
-                        sequence = sequence[-SEQUENCE_LENGTH:]
-                        movement_history = movement_history[-SEQUENCE_LENGTH:]
-                        
-                        # Display grace period indicator
-                        cv2.putText(image, f'Grace: {frames_below_threshold}/{grace_period}', (450, 60), 
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 165, 0), 2, cv2.LINE_AA)
+                # Reset movement tracking if no movement
+                if consecutive_movement_frames > 0:
+                    logger.info(f"--- MOVEMENT SESSION #{movement_sessions} ENDED (lasted {consecutive_movement_frames} frames) ---")
+                consecutive_movement_frames = 0
+                movement_detected = False
+            
+            # PREDICTION LOGIC: Only predict during movement with sufficient buffer and cooldown
+            should_predict = (
+                len(rolling_buffer) == SEQUENCE_LENGTH and  # Buffer is full
+                movement_detected and  # Currently detecting movement
+                consecutive_movement_frames >= min_movement_frames and  # Sustained movement
+                frames_since_prediction >= prediction_cooldown  # Cooldown period passed
+            )
+            
+            if should_predict:
+                # Calculate average movement for current buffer
+                avg_movement = np.mean(movement_history)
+                
+                # Make prediction using rolling buffer
+                total_predictions += 1
+                predictions_this_session += 1
+                frames_since_prediction = 0  # Reset cooldown
+                
+                logger.info(f"Making prediction #{total_predictions} for session #{movement_sessions} ")
+                logger.info(f"  Buffer movement avg: {avg_movement:.4f}, Current: {movement:.4f}")
+                
+                res = model.predict(np.expand_dims(rolling_buffer, axis=0), verbose=0)[0]
+                
+                # Get top 5 predictions
+                top_5_indices = np.argsort(res)[-5:][::-1]
+                
+                logger.info(f"  Top 5 predictions:")
+                for i, idx in enumerate(top_5_indices, 1):
+                    logger.info(f"    {i}. {ACTIONS[idx]}: {res[idx]*100:.2f}%")
+                
+                # Get the best prediction
+                best_class_index = np.argmax(res)
+                confidence = res[best_class_index]
+                predicted_sign = ACTIONS[best_class_index]
+                
+                logger.info(f"  BEST: {predicted_sign} (confidence: {confidence*100:.2f}%)")
+
+                # Visualization (Top 5 Probabilities)
+                image = draw_probability_bars(image, res, ACTIONS, len(rolling_buffer))
+
+                # Lowered confidence threshold to 50%
+                if confidence > 0.5:
+                    if len(sentence) > 0:
+                        if predicted_sign != sentence[-1]:
+                            sentence.append(predicted_sign)
+                            logger.info(f"  [+] Added '{predicted_sign}' to sentence")
                     else:
-                        # Grace period expired - end sequence
-                        avg_movement = np.mean(movement_history) if len(movement_history) > 0 else 0
-                        logger.info(f"--- SEQUENCE #{sequence_count} ENDED (collected {len(sequence)} frames, made {predictions_this_sequence} predictions, avg movement: {avg_movement:.4f}) ---")
-                        sequence = []
-                        movement_history = []
-                        frames_below_threshold = 0
+                        sentence.append(predicted_sign)
+                        logger.info(f"  [+] Added '{predicted_sign}' to sentence (first word)")
+                    
+                    # Display confidence
+                    cv2.putText(image, f'CONF: {confidence:.2f}', (450, 30), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
                 else:
-                    # Display "No Movement" indicator
-                    cv2.putText(image, 'No Movement', (450, 60), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 165, 255), 2, cv2.LINE_AA)
+                    logger.info(f"  [!] Confidence too low ({confidence*100:.2f}%), not adding to sentence")
+                
+                if len(sentence) > 5: 
+                    sentence = sentence[-5:]
+                    
+            # Display rolling buffer info and movement status
+            if len(movement_history) > 0:
+                avg_mov = np.mean(movement_history)
+                
+                # Buffer status - always shows 30/30 when ready
+                buffer_text = f'Buffer: {len(rolling_buffer)}/{SEQUENCE_LENGTH} frames'
+                cv2.putText(image, buffer_text, (10, 430), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2, cv2.LINE_AA)
+                
+                # Draw buffer status bar (always full when ready)
+                bar_width = 200
+                bar_height = 20
+                bar_x = 10
+                bar_y = 440
+                progress = len(rolling_buffer) / SEQUENCE_LENGTH
+                
+                # Background
+                cv2.rectangle(image, (bar_x, bar_y), (bar_x + bar_width, bar_y + bar_height), (50, 50, 50), -1)
+                # Progress (green when full, yellow when filling)
+                color = (0, 255, 0) if len(rolling_buffer) == SEQUENCE_LENGTH else (0, 255, 255)
+                cv2.rectangle(image, (bar_x, bar_y), (bar_x + int(bar_width * progress), bar_y + bar_height), color, -1)
+                # Border
+                cv2.rectangle(image, (bar_x, bar_y), (bar_x + bar_width, bar_y + bar_height), (255, 255, 255), 2)
+                
+                # Movement status and stats
+                status_text = f'Session: {movement_sessions} | Movement: {"YES" if movement_detected else "NO"} | Avg: {avg_mov:.3f}'
+                cv2.putText(image, status_text, (10, 475), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+            
+            # Movement status indicator
+            if movement_detected:
+                # Show movement detected with consecutive frame count
+                cv2.putText(image, f'MOVEMENT DETECTED ({consecutive_movement_frames}f)', (450, 60), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
+            else:
+                # Show no movement
+                cv2.putText(image, 'NO MOVEMENT', (450, 60), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 165, 255), 2, cv2.LINE_AA)
+            
+            # Prediction cooldown indicator
+            if frames_since_prediction < prediction_cooldown:
+                cooldown_left = prediction_cooldown - frames_since_prediction
+                cv2.putText(image, f'Cooldown: {cooldown_left}', (450, 90), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 165, 0), 2, cv2.LINE_AA)
 
             # Draw Sentence Box
             cv2.rectangle(image, (0, 0), (640, 40), (245, 117, 16), -1)
@@ -362,7 +379,7 @@ def predict_improved():
                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
             
             # Show to screen
-            cv2.imshow('WeThinkCode_ SASL Decoder - IMPROVED', image)
+            cv2.imshow('WeThinkCode_ SASL Decoder - HYBRID APPROACH', image)
 
             # Break gracefully
             if cv2.waitKey(10) & 0xFF == ord('q'):
@@ -375,17 +392,17 @@ def predict_improved():
     logger.info("="*80)
     logger.info(f"Total frames processed: {total_frames}")
     logger.info(f"Frames with movement: {frames_with_movement} ({frames_with_movement/total_frames*100:.2f}%)")
-    logger.info(f"Total sequences collected: {sequence_count}")
+    logger.info(f"Total movement sessions: {movement_sessions}")
     logger.info(f"Total predictions made: {total_predictions}")
     logger.info(f"Final sentence: {' '.join(sentence)}")
     logger.info("="*80)
     
     print("\n" + "="*80)
-    print("SESSION SUMMARY")
+    print("SESSION SUMMARY - HYBRID APPROACH")
     print("="*80)
     print(f"Total frames processed: {total_frames}")
     print(f"Frames with movement: {frames_with_movement} ({frames_with_movement/total_frames*100:.2f}%)")
-    print(f"Total sequences collected: {sequence_count}")
+    print(f"Total movement sessions: {movement_sessions}")
     print(f"Total predictions made: {total_predictions}")
     print(f"Final sentence: {' '.join(sentence)}")
     print("="*80)
