@@ -5727,3 +5727,15 @@
 2026-02-15 21:45:24,808 - __main__ - INFO -     5. awake: 0.00%
 2026-02-15 21:45:24,808 - __main__ - INFO -   BEST: start (confidence: 100.00%)
 2026-02-15 21:45:24,915 - __main__ - INFO - --- MOVEMENT SESSION #65 ENDED (lasted 3 frames) ---
+2026-02-17 21:44:16,720 - google_auth_oauthlib.flow - INFO - "GET /?state=LlfDt3IO1ZxOrZtklSyah55yzn4Mkt&code=4/0AfrIepCfDIqFBt5wmKjJLt-FtoRWPIGdUhM8Z-B0MPyWU4u1wlioMKsylWh4He4qhl0A2w&scope=https://www.googleapis.com/auth/drive HTTP/1.1" 200 65
+2026-02-17 21:44:22,757 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-02-17 21:44:24,421 - upload_data - INFO - Starting zip of 9 signs...
+2026-02-17 21:44:59,879 - upload_data - INFO - [OK] Zipped 8100 files (103.70 MB)
+2026-02-17 21:44:59,895 - upload_data - INFO - Starting upload of chantelmuthaphuli@gmail.com.zip (55.54 MB)
+2026-02-17 21:45:10,091 - upload_data - INFO - Upload progress: 45%
+2026-02-17 21:45:19,587 - upload_data - INFO - Upload progress: 90%
+2026-02-17 21:45:23,895 - upload_data - INFO - [OK] Upload completed! File ID: 1UPULKuszCtnUUOIaYXMQ1_41APX4VMIS, Size: 58233533 bytes
+2026-02-17 21:45:24,258 - upload_data - INFO - Verification:
+2026-02-17 21:45:24,259 - upload_data - INFO -   Local file:  chantelmuthaphuli@gmail.com.zip (58,233,533 bytes)
+2026-02-17 21:45:24,260 - upload_data - INFO -   Remote file: chantelmuthaphuli@gmail.com.zip (58,233,533 bytes)
+2026-02-17 21:45:24,260 - upload_data - INFO - [OK] File sizes match!
