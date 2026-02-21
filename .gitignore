@@ -6,9 +6,9 @@ data/
 *.npy
 
 # 2. MODELS (Too big for standard Git)
-model/
-*.h5
-*.keras
+#model/
+#*.h5
+#*.keras
 
 # 3. LOGS
 logs/
