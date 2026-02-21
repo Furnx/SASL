@@ -31,7 +31,7 @@ from upload_data import get_drive_service, create_or_get_contributor_folder, upl
 # MEDIAPIPE SETUP
 # --------------------------------------------------------------------------
 import mediapipe as mp
-mp_holistic = mp.solutions.holistic
+mp_holistic = mp.solutions.holistic #nathi
 mp_drawing = mp.solutions.drawing_utils
 
 def mediapipe_detection(image, model):
