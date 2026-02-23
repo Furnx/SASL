@@ -1,0 +1,38 @@
+# .gitignore — converting_videos_with_OPENCV_AND_MEDIAPIPE
+
+# 1. DATA (Large files — never upload)
+Demonstration_videos/
+Downloaded_videos/
+numpy_results*/
+numpy_normalised/
+pose_visualized_videos/
+*.npy
+*.mp4
+*.avi
+*.mov
+
+# 2. PYTHON
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+
+# 3. IDE & OS
+.env
+.DS_Store
+.vscode/
+.idea/
+uv.lock
+Thumbs.db
+*.swp
+*~
+
+# 4. TEMP
+*.zip
+*.log
+
+# 5. NODE
+node_modules/
+package-lock.json

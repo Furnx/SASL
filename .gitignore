@@ -1,36 +1,70 @@
 # .gitignore
-demo.txt
-# 1. DATA (Never upload the videos!)
+
+# ============================================
+# 1. DATA (Large files — never upload)
+# ============================================
 MP_Data/
 data/
 *.npy
+Demonstration_videos/
+numpy_results*/
+numpy_normalised/
+pose_visualized_videos/
+Downloaded_videos/
+drive_data/
 
-# 2. MODELS (Too big for standard Git)
-#model/
-#*.h5
-#*.keras
+# 2. MODELS (Too big for Git)
+model/
+*.h5
+*.keras
+*.tflite
+*.pb
+*.onnx
 
 # 3. LOGS
 logs/
 training_logs/
+*.log
 
-# 4. PYTHON SYSTEM FILES
+# 4. CREDENTIALS & SECRETS (CRITICAL — never push)
+credentials.json
+client_secret*.json
+token.json
+.env
+*.env
+!.env.example
+
+# 5. SHARED STATE / TEMP FILES
+shared_predictions*.json
+*.zip
+demo.txt
+
+# 6. PYTHON
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
 venv/
 env/
-.env
-.DS_Store
-.vscode/
-.idea/
-uv.lock
-.venv
+.venv/
+*.egg-info/
+build/
+dist/
+*.egg
 
-# 5. NODE/NPM FILES
+# 7. NODE / NPM
 node_modules/
 dist/
 dist-ssr/
 *.local
 package-lock.json
 
-token.json
+# 8. IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+uv.lock
+*.swp
+*.swo
+*~
