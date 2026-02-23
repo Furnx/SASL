@@ -175,7 +175,7 @@ python train_transformer.py
 # Basic
 python predict.py
 
-# With movement detection + LLM (run in two terminals)
+# With movement detection + LLM (run each on its own terminal - parallel)
 python prediction_Improvement.py          # Terminal 1
 python LLM_prediction_improvement.py      # Terminal 2
 ```
@@ -184,6 +184,7 @@ python LLM_prediction_improvement.py      # Terminal 2
 ```bash
 python compare_models.py
 ```
+
 
 ---
 
