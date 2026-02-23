@@ -12,7 +12,7 @@ import shutil
 import mediapipe as mp
 
 # Import configuration
-from config import no_sequences, sequence_length, get_demo_video_path, ACTIVE_WEEK, PROJECT_ROOT_ID
+from config import no_sequences, sequence_length, get_demo_video_path, ACTIVE_WEEK, PROJECT_ROOT_ID, ACTIONS
 
 # Import Google Drive upload helpers
 from upload_data import get_drive_service, create_or_get_contributor_folder, upload_zip_folder, zip_mp_data, verify_upload
@@ -177,16 +177,30 @@ def main():
 
     tagged_user_name = f"{user_name}_RETAKES"
 
-    print("\nEnter the signs you want to retake, separated by commas.")
-    print("Example: hello, goodbye, thank_you")
-    raw_input = input("Target Signs: ").strip()
-    
-    if not raw_input:
-        print("No signs entered. Exiting.")
-        return
+    # Create a list of valid lowercased signs for comparison
+    valid_signs = [action.lower() for action in ACTIONS]
 
-    target_actions = [sign.strip().lower() for sign in raw_input.split(',')]
-    print(f"\n Queued {len(target_actions)} signs for retake: {target_actions}")
+    while True:
+        print("\nEnter the signs you want to retake, separated by commas.")
+        print(f"Available signs for {ACTIVE_WEEK}: {valid_signs}")
+        raw_input = input("Target Signs: ").strip()
+        
+        if not raw_input:
+            print("No signs entered. Exiting.")
+            return
+
+        # Parse and clean the input list
+        target_actions = [sign.strip().lower() for sign in raw_input.split(',')]
+        
+        # Check for any typos or signs not in the active week
+        invalid_signs = [sign for sign in target_actions if sign not in valid_signs]
+        
+        if invalid_signs:
+            print(f"\n ERROR: The following signs are NOT in your active week: {invalid_signs}")
+            print("Please check your spelling and try again.")
+        else:
+            print(f"\n Queued {len(target_actions)} valid signs for retake: {target_actions}")
+            break
 
     if not os.path.exists(RETAKE_DATA_PATH):
         os.makedirs(RETAKE_DATA_PATH)
