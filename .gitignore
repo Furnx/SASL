@@ -15,7 +15,7 @@ drive_data/
 
 # 2. MODELS (Too big for Git)
 model/
-*.h5
+.h5
 *.keras
 *.tflite
 *.pb
