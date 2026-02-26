@@ -5,7 +5,8 @@ requests
 beautifulsoup4
 selenium 
 webdriver-manager
-undetected-chromedriver
+undetected-chromedriver==3.5.5
 blinker==1.7.0
 selenium-wire
 mitmproxy
+yt_dlp

@@ -3,7 +3,7 @@ import os
 import mediapipe as mp
 
 # ====== INPUT / OUTPUT ROOTS ======
-INPUT_ROOT  = "Demonstration_videos"
+INPUT_ROOT  =  "Demonstration_videos"
 OUTPUT_ROOT = "pose_visualized_videos"
 
 # ====== TUNING ======

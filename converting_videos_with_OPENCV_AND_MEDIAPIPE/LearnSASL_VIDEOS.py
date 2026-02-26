@@ -3,7 +3,7 @@ import re
 import time
 import requests
 import yt_dlp
-import undetected_chromedriver as uc
+from selenium import webdriver
 from urllib.parse import urlparse, parse_qs
 from selenium.webdriver.common.by import By
 
@@ -21,10 +21,11 @@ HEADERS = {
 }
 
 def create_driver():
-    options = uc.ChromeOptions()
+    options = webdriver.ChromeOptions()
     options.binary_location = BRAVE_PATH
     options.add_argument("--no-sandbox")
-    return uc.Chrome(options=options)
+    options.add_argument("--headless")
+    return webdriver.Chrome(options=options)
 
 def extract_video_id(url):
     parsed = urlparse(url)

@@ -4,7 +4,7 @@ import numpy as np
 import mediapipe as mp
 
 # ====== INPUT / OUTPUT ROOTS ======
-INPUT_ROOT  = "Demonstration_videos"
+INPUT_ROOT  = "Downloaded_videos" #"Demonstration_videos"
 OUTPUT_ROOT = "numpy_results_2"
 
 # ====== TUNING ======
