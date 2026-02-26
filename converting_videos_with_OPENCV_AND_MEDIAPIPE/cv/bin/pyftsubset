@@ -1,0 +1,8 @@
+#!/home/wtc/WeThinkCode_-Cohort_2025-/converting_videos_with_OPENCV_AND_MEDIAPIPE/cv/bin/python3
+# -*- coding: utf-8 -*-
+import re
+import sys
+from fontTools.subset import main
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
