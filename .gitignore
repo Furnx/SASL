@@ -6,7 +6,7 @@
 MP_Data/
 data/
 *.npy
-Demonstration_videos/
+#Demonstration_videos/
 numpy_results*/
 numpy_normalised/
 pose_visualized_videos/
