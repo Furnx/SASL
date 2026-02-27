@@ -21,7 +21,7 @@ holistic = mp_holistic.Holistic(
     static_image_mode=False,
     model_complexity=2,           # max accuracy
     smooth_landmarks=True,
-    refine_face_landmarks=True,
+    refine_face_landmarks=False,
     min_detection_confidence=0.5,
     min_tracking_confidence=0.5
 )

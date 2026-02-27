@@ -4,9 +4,8 @@ from scipy.interpolate import interp1d
 
 # ====== CONFIG ======
 INPUT_ROOTS = [
-    "numpy_results",
-    #"numpy_results_2_week1",
-     "numpy_results_2",
+    "numpy_results_2_week1",
+    "numpy_results_2_week2",
 ]
 
 OUTPUT_ROOT   = "numpy_normalised"
