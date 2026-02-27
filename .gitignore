@@ -3,7 +3,7 @@
 # ============================================
 # 1. DATA (Large files — never upload)
 # ============================================
-MP_Data/
+#MP_Data/
 data/
 *.npy
 #Demonstration_videos/

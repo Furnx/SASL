@@ -154,72 +154,72 @@ VOCAB_SCHEDULE = {
     # =========================================
     "Week_1_Greetings":  ['hello', 'goodbye', 'yes', 'no', 'welcome', 'awake', 'alive', 'start'],
     "Week_2_Manners":    ['please', 'thank_you', 'sorry', 'excuse_me', 'respect', 'join', 'help', 'accept'],
-    "Week_3_Questions":  ['who', 'what', 'where', 'when', 'why', 'how', 'ask', 'question', 'answer'],
-    "Week_4_Grammar":    ['because', 'but', 'and', 'if', 'or', 'about', 'maybe', 'idea', 'example'],
-    "Week_5_Pronouns":   ['i', 'you', 'me', 'mine', 'we', 'us', 'they', 'your', 'my', 'him', 'her'],
+    "Week_3_Questions":  ['who', 'what', 'where', 'when', 'why', 'how', 'ask', 'question', 'answer']
+    # "Week_4_Grammar":    ['because', 'but', 'and', 'if', 'or', 'about', 'maybe', 'idea', 'example'],
+    # "Week_5_Pronouns":   ['i', 'you', 'me', 'mine', 'we', 'us', 'they', 'your', 'my', 'him', 'her'],
 
-    # =========================================
-    # PHASE 2: PEOPLE & FEELINGS (Weeks 6-10)
-    # =========================================
-    "Week_6_Family_A":   ['mother', 'father', 'brother', 'sister', 'family', 'parents', 'husband', 'wife'],
-    "Week_7_Family_B":   ['grandmother', 'grandfather', 'aunt', 'uncle', 'cousin', 'child', 'baby', 'friend', 'neighbor'],
-    "Week_8_Feelings_A": ['happy', 'sad', 'angry', 'afraid', 'scared', 'cry', 'laugh', 'smile'],
-    "Week_9_Feelings_B": ['tired', 'sick', 'hungry', 'thirsty', 'bored', 'busy', 'pain', 'hurt', 'feel'],
-    "Week_10_Opinions":  ['love', 'like', 'hate', 'enjoy', 'want', 'need', 'prefer', 'hope', 'wish'],
+    # # =========================================
+    # # PHASE 2: PEOPLE & FEELINGS (Weeks 6-10)
+    # # =========================================
+    # "Week_6_Family_A":   ['mother', 'father', 'brother', 'sister', 'family', 'parents', 'husband', 'wife'],
+    # "Week_7_Family_B":   ['grandmother', 'grandfather', 'aunt', 'uncle', 'cousin', 'child', 'baby', 'friend', 'neighbor'],
+    # "Week_8_Feelings_A": ['happy', 'sad', 'angry', 'afraid', 'scared', 'cry', 'laugh', 'smile'],
+    # "Week_9_Feelings_B": ['tired', 'sick', 'hungry', 'thirsty', 'bored', 'busy', 'pain', 'hurt', 'feel'],
+    # "Week_10_Opinions":  ['love', 'like', 'hate', 'enjoy', 'want', 'need', 'prefer', 'hope', 'wish'],
 
-    # =========================================
-    # PHASE 3: DAILY ROUTINE (Weeks 11-16)
-    # =========================================
-    "Week_11_Actions":   ['sleep', 'wake_up', 'eat', 'drink', 'bath', 'wash', 'clean', 'brush', 'rest'],
-    "Week_12_Home_A":    ['home', 'house', 'kitchen', 'bedroom', 'bathroom', 'toilet', 'room', 'door'],
-    "Week_13_Home_B":    ['window', 'table', 'chair', 'bed', 'light', 'lamp', 'key', 'lock', 'floor'],
-    "Week_14_Tech":      ['computer', 'phone', 'tv', 'radio', 'internet', 'video', 'email', 'message', 'call'],
-    "Week_15_Clothing_A":['shirt', 'pants', 'dress', 'shoes', 'socks', 'clothes', 'wear', 'change'],
-    "Week_16_Clothing_B":['jacket', 'hat', 'coat', 'glasses', 'bag', 'purse', 'watch', 'umbrella'],
+    # # =========================================
+    # # PHASE 3: DAILY ROUTINE (Weeks 11-16)
+    # # =========================================
+    # "Week_11_Actions":   ['sleep', 'wake_up', 'eat', 'drink', 'bath', 'wash', 'clean', 'brush', 'rest'],
+    # "Week_12_Home_A":    ['home', 'house', 'kitchen', 'bedroom', 'bathroom', 'toilet', 'room', 'door'],
+    # "Week_13_Home_B":    ['window', 'table', 'chair', 'bed', 'light', 'lamp', 'key', 'lock', 'floor'],
+    # "Week_14_Tech":      ['computer', 'phone', 'tv', 'radio', 'internet', 'video', 'email', 'message', 'call'],
+    # "Week_15_Clothing_A":['shirt', 'pants', 'dress', 'shoes', 'socks', 'clothes', 'wear', 'change'],
+    # "Week_16_Clothing_B":['jacket', 'hat', 'coat', 'glasses', 'bag', 'purse', 'watch', 'umbrella'],
 
-    # =========================================
-    # PHASE 4: FOOD & NATURE (Weeks 17-22)
-    # =========================================
-    "Week_17_Fruit":     ['apple', 'banana', 'orange', 'grape', 'fruit', 'lemon', 'peach', 'strawberry'],
-    "Week_18_Veg":       ['carrot', 'potato', 'tomato', 'onion', 'pumpkin', 'vegetable', 'cabbage', 'corn'],
-    "Week_19_Meals":     ['bread', 'meat', 'chicken', 'fish', 'egg', 'cheese', 'sandwich', 'soup', 'salad'],
-    "Week_20_Drinks":    ['water', 'milk', 'juice', 'tea', 'coffee', 'sugar', 'soda', 'wine', 'beer'],
-    "Week_21_Nature_A":  ['sun', 'moon', 'rain', 'wind', 'cloud', 'sky', 'star', 'weather', 'hot', 'cold'],
-    "Week_22_Nature_B":  ['tree', 'flower', 'grass', 'fire', 'river', 'sea', 'beach', 'mountain', 'ground'],
+    # # =========================================
+    # # PHASE 4: FOOD & NATURE (Weeks 17-22)
+    # # =========================================
+    # "Week_17_Fruit":     ['apple', 'banana', 'orange', 'grape', 'fruit', 'lemon', 'peach', 'strawberry'],
+    # "Week_18_Veg":       ['carrot', 'potato', 'tomato', 'onion', 'pumpkin', 'vegetable', 'cabbage', 'corn'],
+    # "Week_19_Meals":     ['bread', 'meat', 'chicken', 'fish', 'egg', 'cheese', 'sandwich', 'soup', 'salad'],
+    # "Week_20_Drinks":    ['water', 'milk', 'juice', 'tea', 'coffee', 'sugar', 'soda', 'wine', 'beer'],
+    # "Week_21_Nature_A":  ['sun', 'moon', 'rain', 'wind', 'cloud', 'sky', 'star', 'weather', 'hot', 'cold'],
+    # "Week_22_Nature_B":  ['tree', 'flower', 'grass', 'fire', 'river', 'sea', 'beach', 'mountain', 'ground'],
 
-    # =========================================
-    # PHASE 5: TIME & PLACES (Weeks 23-28)
-    # =========================================
-    "Week_23_Time_A":    ['today', 'tomorrow', 'yesterday', 'now', 'later', 'soon', 'before', 'after'],
-    "Week_24_Time_B":    ['morning', 'afternoon', 'evening', 'night', 'day', 'noon', 'midnight', 'time'],
-    "Week_25_Calendar":  ['week', 'month', 'year', 'birthday', 'holiday', 'monday', 'friday', 'weekend'],
-    "Week_26_School":    ['teacher', 'student', 'class', 'book', 'pen', 'paper', 'learn', 'write', 'read', 'study'],
-    "Week_27_Work":      ['work', 'job', 'boss', 'office', 'meeting', 'computer', 'email', 'salary'],
-    "Week_28_Places":    ['school', 'shop', 'hospital', 'police', 'church', 'bank', 'restaurant', 'city', 'town'],
+    # # =========================================
+    # # PHASE 5: TIME & PLACES (Weeks 23-28)
+    # # =========================================
+    # "Week_23_Time_A":    ['today', 'tomorrow', 'yesterday', 'now', 'later', 'soon', 'before', 'after'],
+    # "Week_24_Time_B":    ['morning', 'afternoon', 'evening', 'night', 'day', 'noon', 'midnight', 'time'],
+    # "Week_25_Calendar":  ['week', 'month', 'year', 'birthday', 'holiday', 'monday', 'friday', 'weekend'],
+    # "Week_26_School":    ['teacher', 'student', 'class', 'book', 'pen', 'paper', 'learn', 'write', 'read', 'study'],
+    # "Week_27_Work":      ['work', 'job', 'boss', 'office', 'meeting', 'computer', 'email', 'salary'],
+    # "Week_28_Places":    ['school', 'shop', 'hospital', 'police', 'church', 'bank', 'restaurant', 'city', 'town'],
 
-    # =========================================
-    # PHASE 6: TRANSPORT & MOVEMENT (Weeks 29-32)
-    # =========================================
-    "Week_29_Vehicles":  ['car', 'bus', 'taxi', 'train', 'flight', 'bicycle', 'truck', 'drive', 'ride'],
-    "Week_30_Directions":['left', 'right', 'up', 'down', 'straight', 'stop', 'go', 'come', 'stay'],
-    "Week_31_Travel":    ['visit', 'travel', 'holiday', 'trip', 'ticket', 'passport', 'arrive', 'leave'],
-    "Week_32_Movement":  ['walk', 'run', 'jump', 'sit', 'stand', 'dance', 'play', 'fall', 'climb'],
+    # # =========================================
+    # # PHASE 6: TRANSPORT & MOVEMENT (Weeks 29-32)
+    # # =========================================
+    # "Week_29_Vehicles":  ['car', 'bus', 'taxi', 'train', 'flight', 'bicycle', 'truck', 'drive', 'ride'],
+    # "Week_30_Directions":['left', 'right', 'up', 'down', 'straight', 'stop', 'go', 'come', 'stay'],
+    # "Week_31_Travel":    ['visit', 'travel', 'holiday', 'trip', 'ticket', 'passport', 'arrive', 'leave'],
+    # "Week_32_Movement":  ['walk', 'run', 'jump', 'sit', 'stand', 'dance', 'play', 'fall', 'climb'],
 
-    # =========================================
-    # PHASE 7: ANIMALS & DESCRIPTIONS (Weeks 33-37)
-    # =========================================
-    "Week_33_Pets":      ['cat', 'dog', 'bird', 'fish', 'rabbit', 'mouse', 'pet', 'feed'],
-    "Week_34_Farm":      ['cow', 'pig', 'sheep', 'goat', 'chicken', 'horse', 'duck', 'farm'],
-    "Week_35_Wild":      ['lion', 'elephant', 'monkey', 'giraffe', 'zebra', 'snake', 'crocodile', 'hippo'],
-    "Week_36_Desc_A":    ['big', 'small', 'good', 'bad', 'fast', 'slow', 'loud', 'quiet'],
-    "Week_37_Desc_B":    ['same', 'different', 'open', 'closed', 'full', 'empty', 'new', 'old', 'beautiful'],
+    # # =========================================
+    # # PHASE 7: ANIMALS & DESCRIPTIONS (Weeks 33-37)
+    # # =========================================
+    # "Week_33_Pets":      ['cat', 'dog', 'bird', 'fish', 'rabbit', 'mouse', 'pet', 'feed'],
+    # "Week_34_Farm":      ['cow', 'pig', 'sheep', 'goat', 'chicken', 'horse', 'duck', 'farm'],
+    # "Week_35_Wild":      ['lion', 'elephant', 'monkey', 'giraffe', 'zebra', 'snake', 'crocodile', 'hippo'],
+    # "Week_36_Desc_A":    ['big', 'small', 'good', 'bad', 'fast', 'slow', 'loud', 'quiet'],
+    # "Week_37_Desc_B":    ['same', 'different', 'open', 'closed', 'full', 'empty', 'new', 'old', 'beautiful'],
 
-    # =========================================
-    # PHASE 8: ADVANCED & HEALTH (Weeks 38-40)
-    # =========================================
-    "Week_38_Health":    ['doctor', 'nurse', 'medicine', 'hospital', 'clinic', 'body', 'head', 'stomach', 'blood'],
-    "Week_39_Verbs_Mix": ['give', 'take', 'make', 'do', 'try', 'know', 'think', 'remember', 'forget'],
-    "Week_40_Final_Mix": ['funny', 'cool', 'luck', 'congratulations', 'finish', 'end', 'problem', 'solve']
+    # # =========================================
+    # # PHASE 8: ADVANCED & HEALTH (Weeks 38-40)
+    # # =========================================
+    # "Week_38_Health":    ['doctor', 'nurse', 'medicine', 'hospital', 'clinic', 'body', 'head', 'stomach', 'blood'],
+    # "Week_39_Verbs_Mix": ['give', 'take', 'make', 'do', 'try', 'know', 'think', 'remember', 'forget'],
+    # "Week_40_Final_Mix": ['funny', 'cool', 'luck', 'congratulations', 'finish', 'end', 'problem', 'solve']
 }
 
 # ---------------------------------------------------
@@ -228,7 +228,7 @@ VOCAB_SCHEDULE = {
 
 # !!! CHANGE THIS VARIABLE TO WORK ON A SPECIFIC WEEK !!!
 # Options: 'Week_1_Greetings', 'Week_2_Manners', 'All', etc.
-ACTIVE_WEEK = 'Week_5_Pronouns'
+ACTIVE_WEEK ='All'
 
 def get_actions():
     """

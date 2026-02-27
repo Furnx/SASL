@@ -96,15 +96,21 @@ def load_data():
                 if not os.path.exists(npy_path):
                     print(f"⚠️  Missing frame {frame_num} in {action}/{sequence_dir}")
                     break
-                
+
                 try:
                     res = np.load(npy_path)
+                    # verify feature dimension
+                    if res.shape != (TOTAL_FEATURES,):
+                        print(f"⚠️  Unexpected feature size {res.shape} in {npy_path}, skipping sequence")
+                        window = []  # invalidate
+                        break
                     window.append(res)
                 except Exception as e:
                     print(f"❌ Error loading {npy_path}: {e}")
+                    window = []
                     break
             
-            # Only add complete sequences
+            # Only add complete sequences with correct shape
             if len(window) == SEQUENCE_LENGTH:
                 sequences.append(window)
                 labels.append(label_map[action])
