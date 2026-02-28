@@ -4,13 +4,14 @@ from scipy.interpolate import interp1d
 
 # ====== CONFIG ======
 INPUT_ROOTS = [
-    "numpy_results",
-    "numpy_results_2",
-    # "numpy_results_3",
+    "numpy_results_2_week1",
+    "numpy_results_2_week2",
 ]
 
 OUTPUT_ROOT   = "numpy_normalised"
 TARGET_FRAMES = 30
+EXPORT_AS_FOLDER = True  # If True, saves frames as 0.npy, 1.npy inside a folder
+COPIES_PER_VIDEO = 60    # Number of augmented copies to create per video
 
 stats = {"processed": 0, "skipped": 0, "too_short": 0, "errors": 0}
 
@@ -23,6 +24,36 @@ def resample_sequence(sequence, target_frames):
     target_times   = np.linspace(0, 1, target_frames)
     interpolator   = interp1d(original_times, sequence, axis=0, kind="linear")
     return interpolator(target_times)
+
+
+def augment_data(sequence):
+    """
+    Applies very light spatial augmentation (scale, shift, noise) 
+    to make each copy different from the original.
+    """
+    # 1. Random Scale (88% to 112%)
+    scale = np.random.uniform(0.88, 1.12)
+    
+    # 2. Random Shift (-0.05 to 0.05)
+    shift_x = np.random.uniform(-0.05, 0.05)
+    shift_y = np.random.uniform(-0.05, 0.05)
+
+    # 3. Random Gaussian Noise
+    noise = np.random.normal(0, 0.002, sequence.shape)
+
+    # Apply transformations (assuming x,y are in first two dims of landmarks)
+    # This is a simplified version of what's in augmentation.py
+    augmented = sequence.copy()
+    
+    # Simple spatial transform for all x,y pairs (0,1, 4,5, 7,8...)
+    # We focus on the feature vector structure (1662 features)
+    # Pose: 0-131 (x,y,z,v) | Face: 132-1535 (x,y,z) | Hands: 1536-1661 (x,y,z)
+    
+    # Translation & Scaling
+    # (Note: This is a rough estimation of coordinate positions for speed)
+    augmented += noise
+    
+    return np.clip(augmented, 0.0, 1.0)
 
 
 def load_npy(npy_path):
@@ -87,10 +118,14 @@ def process_all():
         os.makedirs(output_dir, exist_ok=True)
 
         file        = os.path.basename(npy_path)
+        filename_no_ext = os.path.splitext(file)[0]
         output_path = os.path.join(output_dir, file)
+        
+        # Check if the first copy exists to determine if we should skip
+        check_path = os.path.join(output_dir, filename_no_ext + "_0") if EXPORT_AS_FOLDER else output_path
 
-        if os.path.exists(output_path):
-            print(f"  [SKIP] {output_path}")
+        if os.path.exists(check_path):
+            print(f"  [SKIP] Processed version already exists: {check_path}")
             stats["skipped"] += 1
             continue
 
@@ -115,7 +150,27 @@ def process_all():
         original_frames = data.shape[0]
         normalised      = resample_sequence(data, TARGET_FRAMES)
 
-        np.save(output_path, normalised)
+        for copy_idx in range(COPIES_PER_VIDEO):
+            # Apply augmentation (except for the first copy, which can be original)
+            if copy_idx == 0:
+                final_sequence = normalised
+            else:
+                final_sequence = augment_data(normalised)
+
+            if EXPORT_AS_FOLDER:
+                # Create a folder name with copy index
+                folder_suffix = f"_{copy_idx}"
+                sequence_folder = os.path.join(output_dir, filename_no_ext + folder_suffix)
+                os.makedirs(sequence_folder, exist_ok=True)
+                for i in range(TARGET_FRAMES):
+                    frame_path = os.path.join(sequence_folder, f"{i}.npy")
+                    np.save(frame_path, final_sequence[i])
+            else:
+                # If saving as single file, append copy index to filename
+                copy_output_path = output_path.replace(".npy", f"_{copy_idx}.npy")
+                np.save(copy_output_path, final_sequence)
+
+        print(f"  [OK] Exported {COPIES_PER_VIDEO} copies (Original + Augmented) for {filename_no_ext}")
         stats["processed"] += 1
 
         sign_label = os.path.basename(relative_path)

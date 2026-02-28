@@ -4,8 +4,8 @@ import numpy as np
 import mediapipe as mp
 
 # ====== INPUT / OUTPUT ROOTS ======
-INPUT_ROOT  = "Demonstration_videos"
-OUTPUT_ROOT = "numpy_results_2"
+INPUT_ROOT  = "C:/365_days/converting_videos_with_OPENCV_AND_MEDIAPIPE/Demonstration_videos/Week_1_Greetings"
+OUTPUT_ROOT = "numpy_results_2_week1"
 
 # ====== TUNING ======
 HAND_HOLD_FRAMES = 25   # frames to hold last known hand position if both detectors lose it
@@ -18,7 +18,7 @@ holistic = mp_holistic.Holistic(
     static_image_mode=False,
     model_complexity=2,
     smooth_landmarks=True,
-    refine_face_landmarks=True,
+    refine_face_landmarks=False,
     min_detection_confidence=0.5,
     min_tracking_confidence=0.5
 )

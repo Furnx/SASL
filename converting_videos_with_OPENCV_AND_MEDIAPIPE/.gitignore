@@ -1,13 +1,13 @@
 # .gitignore — converting_videos_with_OPENCV_AND_MEDIAPIPE
 
 # 1. DATA (Large files — never upload)
-Demonstration_videos/
-Downloaded_videos/
-numpy_results*/
-numpy_normalised/
+#Demonstration_videos/
+#Downloaded_videos/
+#numpy_results*/
+#numpy_normalised/
 pose_visualized_videos/
-*.npy
-*.mp4
+#*.npy
+#*.mp4
 *.avi
 *.mov
 
@@ -18,6 +18,7 @@ __pycache__/
 venv/
 env/
 .venv/
+opencv_venv/
 
 # 3. IDE & OS
 .env

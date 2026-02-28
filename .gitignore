@@ -3,10 +3,10 @@
 # ============================================
 # 1. DATA (Large files — never upload)
 # ============================================
-MP_Data/
+#MP_Data/
 data/
 *.npy
-Demonstration_videos/
+#Demonstration_videos/
 numpy_results*/
 numpy_normalised/
 pose_visualized_videos/
@@ -15,7 +15,7 @@ drive_data/
 
 # 2. MODELS (Too big for Git)
 model/
-*.h5
+.h5
 *.keras
 *.tflite
 *.pb
