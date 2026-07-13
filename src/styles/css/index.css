@@ -9,10 +9,8 @@
 
 :root
 {
-  --action-colour: rgb(85, 115, 174);
-
+--action-colour: rgb(85, 115, 174);
 --bg-colour:#000;
-
 --fg-colour:#fff;
 --border-radius:10px;
 --border:#ffffffb0;

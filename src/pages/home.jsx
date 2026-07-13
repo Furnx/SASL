@@ -2,8 +2,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Activity, Video, VideoOff, Users } from 'lucide-react';
 import ControlBar from '../components/controlsbar';
+import Navbar from '../components/navbar';
 
 export default function Home() {
+
+  // <div style = {{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px'}}>
+  //     <Navbar/>
+  //      <h1>About Us</h1>
+  // </div>
   // State for UI Logic
   const [cameraActive, setCameraActive] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -103,7 +109,7 @@ export default function Home() {
       if (captureTimerRef.current) {
         clearInterval(captureTimerRef.current);
       }
-    };
+    }; <Route path = '/about' element= {<About/>}/>
   }, []);
 
   // --- 2. Action Handlers ---
