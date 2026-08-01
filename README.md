@@ -1,6 +1,6 @@
 # 🤟 SignBridge SA — South African Sign Language (SASL) Recognition System
 
-> **WeThinkCode_ Cohort 2025** — A full-stack AI system that recognises South African Sign Language (SASL) gestures via webcam and translates them into natural English sentences in real time.
+> A full-stack AI system that recognises South African Sign Language (SASL) gestures via webcam and translates them into natural English sentences in real time.
 
 ---
 
@@ -155,13 +155,3 @@ The system targets **300+ SASL signs** organised into a **40-week learning sched
 | 8 — Advanced | 38–40 | Health, Verbs, Mixed Review |
 
 ---
-
-## 👥 Team
-
-**WeThinkCode_ Cohort 2025** — Sign Language Recognition Project
-
----
-
-## 📄 License
-
-This project is developed as part of the WeThinkCode_ curriculum.
